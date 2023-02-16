@@ -1,4 +1,4 @@
-module go-dingtalk-sdk-wrapper
+module github.com/patsnapops/wrapper-goding
 
 go 1.19
 
