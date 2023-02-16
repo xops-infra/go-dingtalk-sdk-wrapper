@@ -1,4 +1,4 @@
-module go-ding-sdk-wrapper
+module go-dingtalk-sdk-wrapper
 
 go 1.19
 
