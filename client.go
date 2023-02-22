@@ -6,7 +6,6 @@ import (
 	"github.com/alibabacloud-go/dingtalk/oauth2_1_0"
 	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/redis/go-redis/v9"
 	"sync"
 )
 
@@ -41,15 +40,14 @@ type DingTalkClient struct {
 	WorkflowClient *workflow_1_0.Client
 }
 
-func NewDingTalkClient(redisDb *redis.Client, appConfig DingTalkConfig) *DingTalkClient {
+func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
 	authClient, _ := oauth2_1_0.NewClient(openapiConfig)
 
 	return &DingTalkClient{
-		OpenapiConfig:    newOpenaiConfig(),
-		AuthClient:       authClient,
-		AccessTokenCache: NewRedisCache(redisDb),
-		Locker:           new(sync.Mutex),
-		DingTalkConfig:   appConfig,
+		OpenapiConfig:  newOpenaiConfig(),
+		AuthClient:     authClient,
+		Locker:         new(sync.Mutex),
+		DingTalkConfig: appConfig,
 	}
 }
 
