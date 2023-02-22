@@ -2,6 +2,7 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 type WorkflowClient struct {
@@ -16,7 +17,7 @@ func InitWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
 
 func newGetProcessInstanceHeader() *workflow_1_0.GetProcessInstanceHeaders {
 	return &workflow_1_0.GetProcessInstanceHeaders{
-		XAcsDingtalkAccessToken: AccessToken,
+		XAcsDingtalkAccessToken: tea.String(AccessToken),
 	}
 }
 
@@ -35,7 +36,7 @@ func (c *WorkflowClient) GetProcessInstance(
 
 func newTerminateProcessInstanceHeader() *workflow_1_0.TerminateProcessInstanceHeaders {
 	return &workflow_1_0.TerminateProcessInstanceHeaders{
-		XAcsDingtalkAccessToken: AccessToken,
+		XAcsDingtalkAccessToken: tea.String(AccessToken),
 	}
 }
 

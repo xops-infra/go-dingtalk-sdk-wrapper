@@ -10,7 +10,7 @@ import (
 
 var (
 	openapiConfig *openapi.Config
-	AccessToken   *string
+	AccessToken   string
 )
 
 func newOpenaiConfig() *openapi.Config {
@@ -35,7 +35,7 @@ type DingTalkClient struct {
 	OpenapiConfig    *openapi.Config
 	AuthClient       *oauth2_1_0.Client
 	AccessTokenCache Cache
-	AccessToken      *string
+	AccessToken      string
 	Locker           *sync.Mutex
 	DingTalkConfig   DingTalkConfig
 	// Needed Client
@@ -73,17 +73,18 @@ func (d *DingTalkClient) getAccessToken() (*string, error) {
 func (d *DingTalkClient) RefreshAccessToken() error {
 	d.Locker.Lock()
 	//todo cache
-	if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != nil {
+	if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
 		d.AccessToken = AccessToken
 		//todo log
 		d.Locker.Unlock()
 		return nil
 	}
 
-	AccessToken, err := d.getAccessToken()
+	token, err := d.getAccessToken()
 
 	if err == nil {
-		d.AccessToken = AccessToken
+		d.AccessToken = tea.StringValue(token)
+		AccessToken = tea.StringValue(token)
 		d.AccessTokenCache.Set()
 		d.Locker.Unlock()
 	}
