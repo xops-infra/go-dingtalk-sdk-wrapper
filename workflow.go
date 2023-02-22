@@ -2,6 +2,7 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
+	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
@@ -31,7 +32,7 @@ func newGetProcessInstanceRequest(
 func (c *WorkflowClient) GetProcessInstance(
 	processID string) (*workflow_1_0.GetProcessInstanceResponse, error) {
 	return c.client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
-		processID), newGetProcessInstanceHeader(), nil)
+		processID), newGetProcessInstanceHeader(), &service.RuntimeOptions{})
 }
 
 func newTerminateProcessInstanceHeader() *workflow_1_0.TerminateProcessInstanceHeaders {
@@ -50,5 +51,5 @@ func newTerminateProcessInstanceRequest(
 func (c *WorkflowClient) TerminateProcessInstance(
 	processID string) (*workflow_1_0.TerminateProcessInstanceResponse, error) {
 	return c.client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
-		processID), newTerminateProcessInstanceHeader(), nil)
+		processID), newTerminateProcessInstanceHeader(), &service.RuntimeOptions{})
 }
