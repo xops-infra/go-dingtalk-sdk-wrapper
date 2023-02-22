@@ -5,8 +5,8 @@ import (
 )
 
 type Cache interface {
-	Set() error
-	Get() error
+	Set()
+	Get() (*string, error)
 }
 
 type RedisCache struct {
