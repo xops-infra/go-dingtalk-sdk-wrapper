@@ -16,11 +16,6 @@ func init() {
 		AppSecret: "",
 	})
 	client.NewWorkflowClient()
-	token, err := client.getAccessToken()
-	if err != nil {
-		panic(err)
-	}
-	client.AccessToken = *token
 }
 
 func TestNewDingTalkClient(t *testing.T) {

@@ -56,6 +56,11 @@ func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
 func (d *DingTalkClient) NewWorkflowClient() *DingTalkClient {
 	client, _ := workflow_1_0.NewClient(openapiConfig)
 	d.WorkflowClient = InitWorkflowClient(client)
+	token, err := d.getAccessToken()
+	if err != nil {
+		panic(err)
+	}
+	d.AccessToken = *token
 	return d
 }
 
