@@ -7,12 +7,12 @@ import (
 )
 
 type WorkflowClient struct {
-	client *workflow_1_0.Client
+	Client *workflow_1_0.Client
 }
 
 func InitWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
 	return &WorkflowClient{
-		client: client,
+		Client: client,
 	}
 }
 
@@ -31,7 +31,7 @@ func newGetProcessInstanceRequest(
 
 func (c *WorkflowClient) GetProcessInstance(
 	processID string) (*workflow_1_0.GetProcessInstanceResponse, error) {
-	return c.client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
+	return c.Client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
 		processID), newGetProcessInstanceHeader(), &service.RuntimeOptions{})
 }
 
@@ -50,6 +50,6 @@ func newTerminateProcessInstanceRequest(
 
 func (c *WorkflowClient) TerminateProcessInstance(
 	processID string) (*workflow_1_0.TerminateProcessInstanceResponse, error) {
-	return c.client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
+	return c.Client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
 		processID), newTerminateProcessInstanceHeader(), &service.RuntimeOptions{})
 }
