@@ -1,11 +1,12 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"sync"
+
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/dingtalk/oauth2_1_0"
 	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 	"github.com/alibabacloud-go/tea/tea"
-	"sync"
 )
 
 var (
@@ -44,7 +45,6 @@ type DingTalkClient struct {
 
 func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
 	authClient, _ := oauth2_1_0.NewClient(openapiConfig)
-
 	return &DingTalkClient{
 		OpenapiConfig:  newOpenaiConfig(),
 		AuthClient:     authClient,
@@ -73,13 +73,14 @@ func (d *DingTalkClient) getAccessToken() (*string, error) {
 func (d *DingTalkClient) RefreshAccessToken() error {
 	d.Locker.Lock()
 	//todo cache
-	if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
-		d.AccessToken = AccessToken
-		//todo log
-		d.Locker.Unlock()
-		return nil
+	if d.AccessToken != "" {
+		if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
+			d.AccessToken = AccessToken
+			//todo log
+			d.Locker.Unlock()
+			return nil
+		}
 	}
-
 	token, err := d.getAccessToken()
 
 	if err == nil {
