@@ -2,6 +2,7 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -14,8 +15,11 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	contantClient = NewContactClient(cli)
-
+	config := DingTalkConfig{
+		AppKey:    os.Getenv("dingtalk_id"),
+		AppSecret: os.Getenv("dingtalk_secret"),
+	}
+	contantClient = NewContactClient(cli, config)
 }
 
 // test DepartmentList

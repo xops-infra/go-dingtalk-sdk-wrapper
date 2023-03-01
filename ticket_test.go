@@ -5,31 +5,28 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 )
 
 var (
-	config  DingTalkConfig
-	wclient *workflow_1_0.Client
+	ticketCli *WorkflowClient
 )
 
 func init() {
-	config = DingTalkConfig{
+	config := DingTalkConfig{
 		AppKey:    os.Getenv("dingtalk_id"),
 		AppSecret: os.Getenv("dingtalk_secret"),
 	}
-	wclient, _ = InitWorkflowClient()
+	wclient, _ := InitWorkflowClient()
+	ticketCli = NewWorkflowClient(wclient, config)
 }
 
 func TestTickets(t *testing.T) {
-	os.Setenv("task_dingtalk_process_code", "PROC-8FF4478A-DC8D-4922-9B07-xxxx")
+	os.Setenv("task_dingtalk_process_code", "PROC-8FF4478A-DC8D-4922-9B07-")
 	input := &GetTicketInput{
 		ProcessCode: os.Getenv("task_dingtalk_process_code"),
 		StartTime:   time.Now().AddDate(0, 0, -1).UnixMilli(),
 		EndTime:     time.Now().UnixMilli(),
 	}
-	ticketCli := NewWorkflowClient(wclient, config)
 	ids := ticketCli.GetTickets(input)
 	t.Log(len(ids))
 	for _, v := range ids {
@@ -44,14 +41,13 @@ func TestTickets(t *testing.T) {
 
 // testGetTickets tests the GetTickets method.
 func TestGetTickets(t *testing.T) {
-	processID := ""
+	processID := "l992jCwcRuiY93CAh_xzkw0756---"
 	comment := Comment{
 		ProcessID:     processID,
 		Comment:       "test",
 		AlertPersion:  "",
-		CommentUserID: "29070242122092575562",
+		CommentUserID: "290702421220925755---",
 	}
-	ticketCli := NewWorkflowClient(wclient, config)
 	if ticketCli.IsTicketApproved(processID) {
 		t.Log("approved")
 	} else {

@@ -12,12 +12,14 @@ var (
 
 type WorkflowClient struct {
 	Client *workflow_1_0.Client
+	Token  string
 }
 
 func NewWorkflowClient(client *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
 	AccessToken, _ = getAccessToken(config)
 	return &WorkflowClient{
 		Client: client,
+		Token:  AccessToken,
 	}
 }
 
