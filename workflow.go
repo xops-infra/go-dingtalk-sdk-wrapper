@@ -6,15 +6,16 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 )
 
+var (
+	AccessToken string
+)
+
 type WorkflowClient struct {
 	Client *workflow_1_0.Client
 }
 
-func NewWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
-	return InitWorkflowClient(client)
-}
-
-func InitWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
+func NewWorkflowClient(client *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
+	AccessToken, _ = getAccessToken(config)
 	return &WorkflowClient{
 		Client: client,
 	}

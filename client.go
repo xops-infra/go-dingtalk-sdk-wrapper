@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	"github.com/alibabacloud-go/dingtalk/contact_1_0"
 	"github.com/alibabacloud-go/dingtalk/oauth2_1_0"
 	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 	"github.com/alibabacloud-go/tea/tea"
@@ -11,18 +12,19 @@ import (
 
 var (
 	openapiConfig *openapi.Config
-	AccessToken   string
+	authClient    *oauth2_1_0.Client
 )
+
+func init() {
+	openapiConfig = newOpenaiConfig()
+	authClient, _ = oauth2_1_0.NewClient(openapiConfig)
+}
 
 func newOpenaiConfig() *openapi.Config {
 	return &openapi.Config{
 		Protocol: tea.String("https"),
 		RegionId: tea.String("central"),
 	}
-}
-
-func init() {
-	openapiConfig = newOpenaiConfig()
 }
 
 type DingTalkConfig struct {
@@ -33,66 +35,64 @@ type DingTalkConfig struct {
 }
 
 type DingTalkClient struct {
-	OpenapiConfig    *openapi.Config
-	AuthClient       *oauth2_1_0.Client
+	OpenapiConfig *openapi.Config
+	// AuthClient       *oauth2_1_0.Client
 	AccessTokenCache Cache
 	AccessToken      string
 	Locker           *sync.Mutex
 	DingTalkConfig   DingTalkConfig
-	// Needed Client
-	WorkflowClient *WorkflowClient
 }
 
-func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
-	authClient, _ := oauth2_1_0.NewClient(openapiConfig)
-	return &DingTalkClient{
-		OpenapiConfig:  newOpenaiConfig(),
-		AuthClient:     authClient,
-		Locker:         new(sync.Mutex),
-		DingTalkConfig: appConfig,
-	}
-}
-
-func (d *DingTalkClient) NewWorkflowClient() error {
-	client, _ := workflow_1_0.NewClient(openapiConfig)
-	d.WorkflowClient = InitWorkflowClient(client)
-	token, err := d.getAccessToken()
-	if err != nil {
-		return err
-	}
-	d.AccessToken = *token
-	return nil
-}
-
-func (d *DingTalkClient) getAccessToken() (*string, error) {
-	res, err := d.AuthClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
-		AppKey:    tea.String(d.DingTalkConfig.AppKey),
-		AppSecret: tea.String(d.DingTalkConfig.AppSecret),
-	})
+func NewDingTalkClient(appConfig DingTalkConfig) (*DingTalkClient, error) {
+	token, err := getAccessToken(appConfig)
 	if err != nil {
 		return nil, err
 	}
-	return res.Body.AccessToken, nil
+	return &DingTalkClient{
+		OpenapiConfig:  newOpenaiConfig(),
+		Locker:         new(sync.Mutex),
+		DingTalkConfig: appConfig,
+		AccessToken:    token,
+	}, nil
+}
+
+func InitWorkflowClient() (*workflow_1_0.Client, error) {
+	wclient, err := workflow_1_0.NewClient(openapiConfig)
+	if err != nil {
+		return nil, err
+	}
+	return wclient, nil
+}
+
+func InitContactClient() (*contact_1_0.Client, error) {
+	cclient, err := contact_1_0.NewClient(openapiConfig)
+	if err != nil {
+		return nil, err
+	}
+	return cclient, nil
+}
+
+func getAccessToken(config DingTalkConfig) (string, error) {
+	res, err := authClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
+		AppKey:    tea.String(config.AppKey),
+		AppSecret: tea.String(config.AppSecret),
+	})
+	if err != nil {
+		return "", err
+	}
+	return *res.Body.AccessToken, nil
 }
 
 func (d *DingTalkClient) RefreshAccessToken() error {
 	d.Locker.Lock()
-	//todo cache
-	if d.AccessToken != "" {
-		if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
-			d.AccessToken = AccessToken
-			//todo log
-			d.Locker.Unlock()
-			return nil
-		}
+	defer d.Locker.Unlock()
+	res, err := authClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
+		AppKey:    tea.String(d.DingTalkConfig.AppKey),
+		AppSecret: tea.String(d.DingTalkConfig.AppSecret),
+	})
+	if err != nil {
+		return err
 	}
-	token, err := d.getAccessToken()
-
-	if err == nil {
-		d.AccessToken = tea.StringValue(token)
-		AccessToken = tea.StringValue(token)
-		d.AccessTokenCache.Set()
-		d.Locker.Unlock()
-	}
-	return err
+	d.AccessToken = *res.Body.AccessToken
+	return nil
 }

@@ -5,21 +5,21 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 )
 
 var (
-	client *DingTalkClient
+	config  DingTalkConfig
+	wclient *workflow_1_0.Client
 )
 
 func init() {
-	client = NewDingTalkClient(DingTalkConfig{
+	config = DingTalkConfig{
 		AppKey:    os.Getenv("dingtalk_id"),
 		AppSecret: os.Getenv("dingtalk_secret"),
-	})
-	err := client.NewWorkflowClient()
-	if err != nil {
-		panic(err)
 	}
+	wclient, _ = InitWorkflowClient()
 }
 
 func TestTickets(t *testing.T) {
@@ -29,12 +29,12 @@ func TestTickets(t *testing.T) {
 		StartTime:   time.Now().AddDate(0, 0, -1).UnixMilli(),
 		EndTime:     time.Now().UnixMilli(),
 	}
-	ticketCli := NewWorkflowClient(client.WorkflowClient.Client)
-	ids := ticketCli.GetTickets(input, client.AccessToken)
+	ticketCli := NewWorkflowClient(wclient, config)
+	ids := ticketCli.GetTickets(input)
 	t.Log(len(ids))
 	for _, v := range ids {
 		fmt.Println(v)
-		if ticketCli.IsTicketApproved(v, client.AccessToken) {
+		if ticketCli.IsTicketApproved(v) {
 			t.Log("approved")
 		} else {
 			t.Log("not approved")
@@ -47,13 +47,12 @@ func TestGetTickets(t *testing.T) {
 	processID := ""
 	comment := Comment{
 		ProcessID:     processID,
-		AccessToken:   client.AccessToken,
 		Comment:       "test",
 		AlertPersion:  "",
 		CommentUserID: "29070242122092575562",
 	}
-	ticketCli := NewWorkflowClient(client.WorkflowClient.Client)
-	if ticketCli.IsTicketApproved(processID, client.AccessToken) {
+	ticketCli := NewWorkflowClient(wclient, config)
+	if ticketCli.IsTicketApproved(processID) {
 		t.Log("approved")
 	} else {
 		t.Log("not approved")
@@ -65,7 +64,7 @@ func TestGetTickets(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	processInstance, err := ticketCli.GetTicket(processID, client.AccessToken)
+	processInstance, err := ticketCli.GetTicket(processID)
 	if err != nil {
 		t.Error(err)
 	}
