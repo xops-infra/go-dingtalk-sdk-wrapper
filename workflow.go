@@ -10,6 +10,10 @@ type WorkflowClient struct {
 	Client *workflow_1_0.Client
 }
 
+func NewWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
+	return InitWorkflowClient(client)
+}
+
 func InitWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
 	return &WorkflowClient{
 		Client: client,
