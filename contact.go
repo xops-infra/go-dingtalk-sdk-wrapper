@@ -16,7 +16,7 @@ type ContactClient struct {
 }
 
 func NewContactClient(cli *contact_1_0.Client, config DingTalkConfig) *ContactClient {
-	token, _ := getAccessToken(config)
+	token, _ := GetAccessToken(config)
 	return &ContactClient{
 		Client: cli,
 		Token:  token,

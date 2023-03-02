@@ -30,6 +30,20 @@ type Comment struct {
 func NewTicket(cli *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
 	return NewWorkflowClient(cli, config)
 }
+func NewWorkflowClient(client *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
+	AccessToken, _ = GetAccessToken(config)
+	return &WorkflowClient{
+		Client: client,
+	}
+}
+
+func InitWorkflowClientV2() (*workflow_1_0.Client, error) {
+	wclient, err := workflow_1_0.NewClient(openapiConfig)
+	if err != nil {
+		return nil, err
+	}
+	return wclient, nil
+}
 
 func (t *WorkflowClient) GetTickets(input *GetTicketInput) []string {
 	listProcessInstanceIdsHeaders := &workflow_1_0.ListProcessInstanceIdsHeaders{}

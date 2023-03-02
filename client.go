@@ -12,6 +12,7 @@ import (
 
 var (
 	openapiConfig *openapi.Config
+	AccessToken   string
 	authClient    *oauth2_1_0.Client
 )
 
@@ -41,27 +42,17 @@ type DingTalkClient struct {
 	AccessToken      string
 	Locker           *sync.Mutex
 	DingTalkConfig   DingTalkConfig
+	// Needed Client
+	WorkflowClient *WorkflowClient
 }
 
-func NewDingTalkClient(appConfig DingTalkConfig) (*DingTalkClient, error) {
-	token, err := getAccessToken(appConfig)
-	if err != nil {
-		return nil, err
-	}
+func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
+
 	return &DingTalkClient{
 		OpenapiConfig:  newOpenaiConfig(),
 		Locker:         new(sync.Mutex),
 		DingTalkConfig: appConfig,
-		AccessToken:    token,
-	}, nil
-}
-
-func InitWorkflowClient() (*workflow_1_0.Client, error) {
-	wclient, err := workflow_1_0.NewClient(openapiConfig)
-	if err != nil {
-		return nil, err
 	}
-	return wclient, nil
 }
 
 func InitContactClient() (*contact_1_0.Client, error) {
@@ -72,7 +63,13 @@ func InitContactClient() (*contact_1_0.Client, error) {
 	return cclient, nil
 }
 
-func getAccessToken(config DingTalkConfig) (string, error) {
+func (d *DingTalkClient) NewWorkflowClient() *DingTalkClient {
+	client, _ := workflow_1_0.NewClient(openapiConfig)
+	d.WorkflowClient = InitWorkflowClient(client)
+	return d
+}
+
+func GetAccessToken(config DingTalkConfig) (string, error) {
 	res, err := authClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
 		AppKey:    tea.String(config.AppKey),
 		AppSecret: tea.String(config.AppSecret),
@@ -83,16 +80,34 @@ func getAccessToken(config DingTalkConfig) (string, error) {
 	return *res.Body.AccessToken, nil
 }
 
-func (d *DingTalkClient) RefreshAccessToken() error {
-	d.Locker.Lock()
-	defer d.Locker.Unlock()
+func (d *DingTalkClient) getAccessToken() (*string, error) {
 	res, err := authClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
 		AppKey:    tea.String(d.DingTalkConfig.AppKey),
 		AppSecret: tea.String(d.DingTalkConfig.AppSecret),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	d.AccessToken = *res.Body.AccessToken
-	return nil
+	return res.Body.AccessToken, nil
+}
+
+func (d *DingTalkClient) RefreshAccessToken() error {
+	d.Locker.Lock()
+	//todo cache
+	if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
+		d.AccessToken = AccessToken
+		//todo log
+		d.Locker.Unlock()
+		return nil
+	}
+
+	token, err := d.getAccessToken()
+
+	if err == nil {
+		d.AccessToken = tea.StringValue(token)
+		AccessToken = tea.StringValue(token)
+		d.AccessTokenCache.Set()
+		d.Locker.Unlock()
+	}
+	return err
 }

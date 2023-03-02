@@ -16,7 +16,7 @@ func init() {
 		AppKey:    os.Getenv("dingtalk_id"),
 		AppSecret: os.Getenv("dingtalk_secret"),
 	}
-	wclient, _ := InitWorkflowClient()
+	wclient, _ := InitWorkflowClientV2()
 	ticketCli = NewWorkflowClient(wclient, config)
 }
 
