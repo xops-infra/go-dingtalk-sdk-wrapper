@@ -54,6 +54,14 @@ func NewDingTalkClient(appConfig *DingTalkConfig) *DingTalkClient {
 	}
 }
 
+func InitContactClient() (*contact_1_0.Client, error) {
+	cclient, err := contact_1_0.NewClient(openapiConfig)
+	if err != nil {
+		return nil, err
+	}
+	return cclient, nil
+}
+
 func (d *DingTalkClient) WithWorkflowClient(appConfig *DingTalkConfig) *DingTalkClient {
 	client, _ := workflow_1_0.NewClient(openapiConfig)
 	d.WorkflowClient = NewWorkflowClient(client, appConfig)

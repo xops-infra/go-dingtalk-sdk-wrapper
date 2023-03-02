@@ -3,15 +3,16 @@ package go_dingtalk_sdk_wrapper
 import (
 	"fmt"
 
-	dingtalkworkflow_1_0 "github.com/alibabacloud-go/dingtalk/workflow_1_0"
+	"github.com/alibabacloud-go/dingtalk/workflow_1_0"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
+	"github.com/patsnapops/noop/log"
 	"github.com/spf13/cast"
 )
 
-type Ticket struct {
-	Client *dingtalkworkflow_1_0.Client
-}
+// type Ticket struct {
+// 	Client *workflow_1_0.Client
+// }
 
 type GetTicketInput struct {
 	ProcessCode string
@@ -19,16 +20,35 @@ type GetTicketInput struct {
 	EndTime     int64
 }
 
-func NewTicket(cli *dingtalkworkflow_1_0.Client) *Ticket {
-	return &Ticket{
-		Client: cli,
+type Comment struct {
+	ProcessID     string
+	Comment       string //评论内容
+	AlertPersion  string //通知@多人，这里的内容组装需要自己实现  "[周xx](2907024xxxx09257xxxx)[崔xx](303256xxxx8455xxxx)"
+	CommentUserID string //默认评论的人，这里没有app用户所以只能选择某个具体的人，比如开发者，如果离职记得更换否则评论会失败
+}
+
+func NewTicket(cli *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
+	return NewWorkflowClient(cli, config)
+}
+func NewWorkflowClient(client *workflow_1_0.Client, config DingTalkConfig) *WorkflowClient {
+	AccessToken, _ = GetAccessToken(config)
+	return &WorkflowClient{
+		Client: client,
 	}
 }
 
-func (t *Ticket) GetTickets(input *GetTicketInput, accessToken string) []string {
-	listProcessInstanceIdsHeaders := &dingtalkworkflow_1_0.ListProcessInstanceIdsHeaders{}
-	listProcessInstanceIdsHeaders.XAcsDingtalkAccessToken = tea.String(accessToken)
-	listProcessInstanceIdsRequest := &dingtalkworkflow_1_0.ListProcessInstanceIdsRequest{
+func InitWorkflowClientV2() (*workflow_1_0.Client, error) {
+	wclient, err := workflow_1_0.NewClient(openapiConfig)
+	if err != nil {
+		return nil, err
+	}
+	return wclient, nil
+}
+
+func (t *WorkflowClient) GetTickets(input *GetTicketInput) []string {
+	listProcessInstanceIdsHeaders := &workflow_1_0.ListProcessInstanceIdsHeaders{}
+	listProcessInstanceIdsHeaders.XAcsDingtalkAccessToken = tea.String(AccessToken)
+	listProcessInstanceIdsRequest := &workflow_1_0.ListProcessInstanceIdsRequest{
 		ProcessCode: tea.String(input.ProcessCode),
 		StartTime:   tea.Int64(input.StartTime),
 		EndTime:     tea.Int64(input.EndTime),
@@ -39,8 +59,8 @@ func (t *Ticket) GetTickets(input *GetTicketInput, accessToken string) []string 
 	for {
 		res, err := t.Client.ListProcessInstanceIdsWithOptions(listProcessInstanceIdsRequest, listProcessInstanceIdsHeaders, &util.RuntimeOptions{})
 		if err != nil {
-			fmt.Println(err)
-			break
+			log.Errorf("ListProcessInstanceIdsWithOptions error: %v", err)
+			continue
 		}
 		lists := res.Body.Result.List
 		for _, v := range lists {
@@ -52,4 +72,51 @@ func (t *Ticket) GetTickets(input *GetTicketInput, accessToken string) []string 
 		listProcessInstanceIdsRequest.NextToken = tea.Int64(cast.ToInt64(*res.Body.Result.NextToken))
 	}
 	return processIDs
+}
+
+// isTicketApproved returns true if the ticket is approved.
+func (t *WorkflowClient) IsTicketApproved(processID string) bool {
+	getProcessInstanceHeaders := &workflow_1_0.GetProcessInstanceHeaders{}
+	getProcessInstanceHeaders.XAcsDingtalkAccessToken = tea.String(AccessToken)
+	getProcessInstanceRequest := &workflow_1_0.GetProcessInstanceRequest{
+		ProcessInstanceId: tea.String(processID),
+	}
+	res, err := t.Client.GetProcessInstanceWithOptions(getProcessInstanceRequest, getProcessInstanceHeaders, &util.RuntimeOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return *res.Body.Result.Status == "COMPLETED"
+}
+
+// addTicketComment adds a comment to the ticket.
+func (t *WorkflowClient) AddComment(Comment Comment) error {
+	addCommentHeaders := &workflow_1_0.AddProcessInstanceCommentHeaders{}
+	addCommentHeaders.XAcsDingtalkAccessToken = tea.String(AccessToken)
+	addCommentRequest := &workflow_1_0.AddProcessInstanceCommentRequest{
+		CommentUserId:     tea.String(Comment.CommentUserID),
+		ProcessInstanceId: tea.String(Comment.ProcessID),
+		Text:              tea.String(fmt.Sprintf("%s %s", Comment.AlertPersion, Comment.Comment)),
+	}
+	_, err := t.Client.AddProcessInstanceCommentWithOptions(addCommentRequest, addCommentHeaders, &util.RuntimeOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// getTicket
+func (t *WorkflowClient) GetTicket(processID string) (*ProcessInstance, error) {
+	getProcessInstanceHeaders := &workflow_1_0.GetProcessInstanceHeaders{}
+	getProcessInstanceHeaders.XAcsDingtalkAccessToken = tea.String(AccessToken)
+	getProcessInstanceRequest := &workflow_1_0.GetProcessInstanceRequest{
+		ProcessInstanceId: tea.String(processID),
+	}
+	res, err := t.Client.GetProcessInstanceWithOptions(getProcessInstanceRequest, getProcessInstanceHeaders, &util.RuntimeOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &ProcessInstance{res.Body.Result}, nil
 }
