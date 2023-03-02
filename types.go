@@ -1,28 +1,36 @@
 package go_dingtalk_sdk_wrapper
 
-import (
-	"github.com/redis/go-redis/v9"
-)
+import "time"
+
+type TokenDetail struct {
+	// Dingtalk token
+	Token    string `json:"token"`
+	CreateAt int64  `json:"create_at"`
+	ExpireIn int64  `json:"expire_in"`
+}
+
+func (t *TokenDetail) IsExpire() bool {
+	timeNow := time.Now().Unix()
+	return timeNow > t.CreateAt+t.ExpireIn
+}
 
 type Cache interface {
-	Set()
+	Set() error
 	Get() (string, error)
 }
 
-type RedisCache struct {
-	redisClient *redis.Client
+type MemoryCache struct {
 }
 
-func NewRedisCache(client *redis.Client) *RedisCache {
-	return &RedisCache{
-		redisClient: client,
-	}
+func NewMemoryCache() *MemoryCache {
+	return &MemoryCache{}
 }
 
-func (r *RedisCache) Set() error {
+func (r *MemoryCache) Set() error {
+
 	return nil
 }
 
-func (r *RedisCache) Get() error {
+func (r *MemoryCache) Get() error {
 	return nil
 }

@@ -1,7 +1,9 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/dingtalk/oauth2_1_0"
@@ -11,7 +13,6 @@ import (
 
 var (
 	openapiConfig *openapi.Config
-	AccessToken   string
 )
 
 func newOpenaiConfig() *openapi.Config {
@@ -26,24 +27,24 @@ func init() {
 }
 
 type DingTalkConfig struct {
-	AppKey    string
-	CorpId    string
-	AppSecret string
-	AgentId   string
+	AppKey      string
+	CorpId      string
+	AppSecret   string
+	AgentId     string
+	AccessToken *TokenDetail
 }
 
 type DingTalkClient struct {
-	OpenapiConfig    *openapi.Config
-	AuthClient       *oauth2_1_0.Client
-	AccessTokenCache Cache
-	AccessToken      string
-	Locker           *sync.Mutex
-	DingTalkConfig   DingTalkConfig
+	OpenapiConfig *openapi.Config
+	AuthClient    *oauth2_1_0.Client
+	//AccessTokenCache
+	Locker         *sync.Mutex
+	DingTalkConfig *DingTalkConfig
 	// Needed Client
 	WorkflowClient *WorkflowClient
 }
 
-func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
+func NewDingTalkClient(appConfig *DingTalkConfig) *DingTalkClient {
 	authClient, _ := oauth2_1_0.NewClient(openapiConfig)
 	return &DingTalkClient{
 		OpenapiConfig:  newOpenaiConfig(),
@@ -53,46 +54,66 @@ func NewDingTalkClient(appConfig DingTalkConfig) *DingTalkClient {
 	}
 }
 
-func (d *DingTalkClient) NewWorkflowClient() *DingTalkClient {
+func (d *DingTalkClient) WithWorkflowClient(appConfig *DingTalkConfig) *DingTalkClient {
 	client, _ := workflow_1_0.NewClient(openapiConfig)
-	d.WorkflowClient = InitWorkflowClient(client)
-	token, err := d.getAccessToken()
-	if err != nil {
-		panic(err)
-	}
-	d.AccessToken = *token
+	d.WorkflowClient = NewWorkflowClient(client, appConfig)
+
 	return d
 }
 
-func (d *DingTalkClient) getAccessToken() (*string, error) {
+func (d *DingTalkClient) setAccessToken() error {
+	CreateAt := time.Now().Unix()
 	res, err := d.AuthClient.GetAccessToken(&oauth2_1_0.GetAccessTokenRequest{
 		AppKey:    tea.String(d.DingTalkConfig.AppKey),
 		AppSecret: tea.String(d.DingTalkConfig.AppSecret),
 	})
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("获取dingtalk token异常，因为%s", err.Error())
 	}
-	return res.Body.AccessToken, nil
+	d.DingTalkConfig.AccessToken = &TokenDetail{
+		Token:    tea.StringValue(res.Body.AccessToken),
+		ExpireIn: tea.Int64Value(res.Body.ExpireIn),
+		CreateAt: CreateAt,
+	}
+
+	return nil
 }
 
-func (d *DingTalkClient) RefreshAccessToken() error {
-	d.Locker.Lock()
-	//todo cache
-	if d.AccessToken != "" {
-		if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
-			d.AccessToken = AccessToken
-			//todo log
-			d.Locker.Unlock()
-			return nil
+func (d *DingTalkClient) SetAccessToken() error {
+	if d.DingTalkConfig.AccessToken == nil {
+		err := d.setAccessToken()
+		if err != nil {
+			return err
 		}
 	}
-	token, err := d.getAccessToken()
 
-	if err == nil {
-		d.AccessToken = tea.StringValue(token)
-		AccessToken = tea.StringValue(token)
-		d.AccessTokenCache.Set()
-		d.Locker.Unlock()
+	if !d.DingTalkConfig.AccessToken.IsExpire() {
+		return nil
 	}
-	return err
+	err := d.setAccessToken()
+	if err != nil {
+		return err
+	}
+	return nil
 }
+
+//func (d *DingTalkClient) RefreshAccessToken() error {
+//	d.Locker.Lock()
+//	//todo cache
+//	if d.DingTalkConfig.AccessToken != nil {
+//		if AccessToken, err := d.AccessTokenCache.Get(); err == nil && AccessToken != "" {
+//			d.DingTalkConfig.AccessToken = AccessToken
+//			//todo log
+//			d.Locker.Unlock()
+//			return nil
+//		}
+//	}
+//	token, err := d.GetAccessToken()
+//
+//	if err == nil {
+//		d.DingTalkConfig.AccessToken = tea.StringValue(token)
+//		d.AccessTokenCache.Set()
+//		d.Locker.Unlock()
+//	}
+//	return err
+//}

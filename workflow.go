@@ -7,18 +7,20 @@ import (
 )
 
 type WorkflowClient struct {
-	Client *workflow_1_0.Client
+	client *workflow_1_0.Client
+	config *DingTalkConfig
 }
 
-func InitWorkflowClient(client *workflow_1_0.Client) *WorkflowClient {
+func NewWorkflowClient(client *workflow_1_0.Client, appConfig *DingTalkConfig) *WorkflowClient {
 	return &WorkflowClient{
-		Client: client,
+		client: client,
+		config: appConfig,
 	}
 }
 
-func newGetProcessInstanceHeader() *workflow_1_0.GetProcessInstanceHeaders {
+func newGetProcessInstanceHeader(token string) *workflow_1_0.GetProcessInstanceHeaders {
 	return &workflow_1_0.GetProcessInstanceHeaders{
-		XAcsDingtalkAccessToken: tea.String(AccessToken),
+		XAcsDingtalkAccessToken: tea.String(token),
 	}
 }
 
@@ -31,13 +33,13 @@ func newGetProcessInstanceRequest(
 
 func (c *WorkflowClient) GetProcessInstance(
 	processID string) (*workflow_1_0.GetProcessInstanceResponse, error) {
-	return c.Client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
-		processID), newGetProcessInstanceHeader(), &service.RuntimeOptions{})
+	return c.client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
+		processID), newGetProcessInstanceHeader(c.config.AccessToken.Token), &service.RuntimeOptions{})
 }
 
-func newTerminateProcessInstanceHeader() *workflow_1_0.TerminateProcessInstanceHeaders {
+func newTerminateProcessInstanceHeader(token string) *workflow_1_0.TerminateProcessInstanceHeaders {
 	return &workflow_1_0.TerminateProcessInstanceHeaders{
-		XAcsDingtalkAccessToken: tea.String(AccessToken),
+		XAcsDingtalkAccessToken: tea.String(token),
 	}
 }
 
@@ -50,6 +52,6 @@ func newTerminateProcessInstanceRequest(
 
 func (c *WorkflowClient) TerminateProcessInstance(
 	processID string) (*workflow_1_0.TerminateProcessInstanceResponse, error) {
-	return c.Client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
-		processID), newTerminateProcessInstanceHeader(), &service.RuntimeOptions{})
+	return c.client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
+		processID), newTerminateProcessInstanceHeader(c.config.AccessToken.Token), &service.RuntimeOptions{})
 }
