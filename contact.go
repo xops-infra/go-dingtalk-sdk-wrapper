@@ -5,30 +5,29 @@ package go_dingtalk_sdk_wrapper
 */
 
 import (
-	"github.com/alibabacloud-go/dingtalk/contact_1_0"
+	contact "github.com/alibabacloud-go/dingtalk/contact_1_0"
 	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
 type ContactClient struct {
-	Client *contact_1_0.Client
-	Token  string
+	Client      *contact.Client
+	tokenDetail *TokenDetail
 }
 
-func NewContactClient(cli *contact_1_0.Client, config DingTalkConfig) *ContactClient {
-	token, _ := GetAccessToken(config)
+func NewContactClient(client *contact.Client, token *TokenDetail) *ContactClient {
 	return &ContactClient{
-		Client: cli,
-		Token:  token,
+		Client:      client,
+		tokenDetail: token,
 	}
 }
 
 // DepartmentList 403 forbidden
 func (c *ContactClient) DepartmentList() ([]*int64, error) {
-	searchDepartmentHeaders := &contact_1_0.SearchDepartmentHeaders{
-		XAcsDingtalkAccessToken: tea.String(AccessToken),
+	searchDepartmentHeaders := &contact.SearchDepartmentHeaders{
+		XAcsDingtalkAccessToken: tea.String(c.tokenDetail.Token),
 	}
-	searchDepartmentRequest := &contact_1_0.SearchDepartmentRequest{
+	searchDepartmentRequest := &contact.SearchDepartmentRequest{
 		QueryWord: tea.String("ops"), // empty string means all
 	}
 	res, err := c.Client.SearchDepartmentWithOptions(searchDepartmentRequest, searchDepartmentHeaders, &service.RuntimeOptions{})
