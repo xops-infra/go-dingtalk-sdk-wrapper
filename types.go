@@ -1,6 +1,7 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
@@ -77,6 +78,23 @@ type ProcessInstanceResp workflow.GetProcessInstanceResponseBody
 
 type GrantProcessInstanceForDownloadFileResp workflow.GrantProcessInstanceForDownloadFileResponseBody
 
+type AttachmentFiled struct {
+	SpaceID   string    `json:"spaceId"`
+	FileName  string    `json:"fileName"`
+	Thumbnail Thumbnail `json:"thumbnail"`
+	FileSize  string    `json:"fileSize"`
+	FileType  string    `json:"fileType"`
+	FileID    string    `json:"fileId"`
+}
+type Thumbnail struct {
+	AuthCode    string `json:"authCode"`
+	AuthMediaID string `json:"authMediaId"`
+	Rotation    int    `json:"rotation"`
+	Width       int    `json:"width"`
+	MediaID     string `json:"mediaId"`
+	Height      int    `json:"height"`
+}
+
 func (r *ProcessInstanceResp) GetStatus() ApprovalStatus {
 	return ApprovalStatus(tea.StringValue(r.Result.Status))
 }
@@ -95,6 +113,21 @@ func (r *ProcessInstanceResp) GetResult() ApprovalResult {
 
 func (r *ProcessInstanceResp) IsAgree() bool {
 	return r.GetStatus() == Completed && r.GetResult() == Agree
+}
+
+func (r *ProcessInstanceResp) GetAttachmentFileIDs() ([]AttachmentFiled, error) {
+	attachFileds := make([]AttachmentFiled, 0)
+	for _, v := range r.Result.FormComponentValues {
+		if tea.StringValue(v.ComponentType) == "DDAttachment" {
+			attachments := []AttachmentFiled{}
+			err := json.Unmarshal([]byte(tea.StringValue(v.Value)), &attachments)
+			if err != nil {
+				return nil, err
+			}
+			attachFileds = append(attachFileds, attachments...)
+		}
+	}
+	return attachFileds, nil
 }
 
 func (r *ProcessInstanceResp) getTasks() ApprovalTask {

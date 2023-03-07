@@ -11,13 +11,13 @@ import (
 )
 
 type ContactClient struct {
-	Client      *contact.Client
+	client      *contact.Client
 	tokenDetail *TokenDetail
 }
 
 func NewContactClient(client *contact.Client, token *TokenDetail) *ContactClient {
 	return &ContactClient{
-		Client:      client,
+		client:      client,
 		tokenDetail: token,
 	}
 }
@@ -30,7 +30,7 @@ func (c *ContactClient) DepartmentList() ([]*int64, error) {
 	searchDepartmentRequest := &contact.SearchDepartmentRequest{
 		QueryWord: tea.String("ops"), // empty string means all
 	}
-	res, err := c.Client.SearchDepartmentWithOptions(searchDepartmentRequest, searchDepartmentHeaders, &service.RuntimeOptions{})
+	res, err := c.client.SearchDepartmentWithOptions(searchDepartmentRequest, searchDepartmentHeaders, &service.RuntimeOptions{})
 	if err != nil {
 		return []*int64{}, err
 	}

@@ -12,6 +12,7 @@ import (
 
 var (
 	processID = "OzF5M2WCTwuiqZhDtB55Og07561678157055"
+	// processID = "l992jCwcRuiY93CAh_xzkw07561677635418" // 有附件
 )
 
 func init() {
@@ -62,7 +63,7 @@ func TestGetProcessInstance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(tea.Prettify(resp.Result))
+	fmt.Println(resp.GetAttachmentFileIDs())
 }
 
 // test GrantProcessInstanceForDownloadFile
