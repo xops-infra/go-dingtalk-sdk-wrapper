@@ -2,19 +2,32 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
+	"net/http"
+	"os"
 	"testing"
+	"time"
+
+	"github.com/alibabacloud-go/tea/tea"
 )
 
-func TestAddComment(t *testing.T) {
+var (
+	processID = "OzF5M2WCTwuiqZhDtB55Og07561678157055"
+)
 
-	config := DingTalkConfig{}
+func init() {
+	config := DingTalkConfig{
+		AppKey:    os.Getenv("dingtalk_id"),
+		AppSecret: os.Getenv("dingtalk_secret"),
+	}
 	client = NewDingTalkClient(&config).WithWorkflowClient()
 	err := client.SetAccessToken()
 	if err != nil {
-		t.Log(err)
+		panic(err)
 	}
+}
+
+func TestAddComment(t *testing.T) {
 	fmt.Println(client.WorkflowClient.tokenDetail)
-	processID := "uIXr5HlNQ-u5YWSQB9LXUg07561677132296"
 	comment := CommentInput{
 		ProcessID:     processID,
 		Comment:       "test1231",
@@ -28,7 +41,43 @@ func TestAddComment(t *testing.T) {
 	} else {
 		t.Log("not approved")
 	}
-
-	err = client.WorkflowClient.AddProcessInstancedComment(&comment)
+	err := client.WorkflowClient.AddProcessInstancedComment(&comment)
 	t.Log(err)
+}
+
+// test list
+func TestListProcessInstance(t *testing.T) {
+	resp := client.WorkflowClient.ListProcessInstanceIds(&ListWorkflowInput{
+		ProcessCode: "PROC-8FF4478A-DC8D-4922-9B07-36DE233B1DD5",
+		StartTime:   time.Now().AddDate(0, 0, -1).UnixMilli(),
+		EndTime:     time.Now().UnixMilli(),
+		MaxResults:  10,
+	})
+	t.Log(tea.Prettify(resp))
+}
+
+// test GetProcessInstance
+func TestGetProcessInstance(t *testing.T) {
+	resp, err := client.WorkflowClient.GetProcessInstance(processID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(tea.Prettify(resp.Result))
+}
+
+// test GrantProcessInstanceForDownloadFile
+func TestGetAttachment(t *testing.T) {
+	resp, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(&GrantProcessInstanceForDownloadFileInput{
+		ProcessID: processID,
+		FileId:    "98285509057",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(resp)
+	resp2, err := http.Get(*resp.Result.DownloadUri)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(resp2.StatusCode, resp2.Body)
 }

@@ -2,10 +2,11 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
-	workflow "github.com/alibabacloud-go/dingtalk/workflow_1_0"
-	"github.com/alibabacloud-go/tea/tea"
 	"sort"
 	"time"
+
+	workflow "github.com/alibabacloud-go/dingtalk/workflow_1_0"
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 type TokenDetail struct {
@@ -33,6 +34,11 @@ type CommentInput struct {
 	Comment       string      //评论内容
 	AlertPerson   AlertPerson //通知@多人，  "[周xx](2907024xxxx09257xxxx)[崔xx](303256xxxx8455xxxx)"
 	CommentUserID string      //指评论的人
+}
+
+type GrantProcessInstanceForDownloadFileInput struct {
+	FileId    string
+	ProcessID string
 }
 
 type AlertPerson map[string]string
@@ -68,6 +74,8 @@ const (
 
 // ProcessInstanceResp 重定向工单返回体
 type ProcessInstanceResp workflow.GetProcessInstanceResponseBody
+
+type GrantProcessInstanceForDownloadFileResp workflow.GrantProcessInstanceForDownloadFileResponseBody
 
 func (r *ProcessInstanceResp) GetStatus() ApprovalStatus {
 	return ApprovalStatus(tea.StringValue(r.Result.Status))

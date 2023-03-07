@@ -2,6 +2,7 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
+
 	workflow "github.com/alibabacloud-go/dingtalk/workflow_1_0"
 	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
@@ -92,11 +93,10 @@ func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) []stri
 		res, err := c.client.ListProcessInstanceIdsWithOptions(newListProcessInstanceIdsRequest(input),
 			newListProcessInstanceIdsHeaders(c.tokenDetail.Token),
 			&service.RuntimeOptions{})
-
 		if err != nil {
 			continue
 		}
-
+		fmt.Println(res.Body.Result.List)
 		processIDs = append(processIDs, tea.StringSliceValue(res.Body.Result.List)...)
 		if res.Body.Result.NextToken == nil {
 			break
@@ -125,4 +125,27 @@ func (c *WorkflowClient) AddProcessInstancedComment(input *CommentInput) error {
 	_, err := c.client.AddProcessInstanceCommentWithOptions(newAddProcessInstanceCommentRequest(input),
 		newAddProcessInstanceCommentHeaders(c.tokenDetail.Token), &service.RuntimeOptions{})
 	return err
+}
+
+// get attachment download url
+func newGrantProcessInstanceForDownloadFileHeaders(token string) *workflow.GrantProcessInstanceForDownloadFileHeaders {
+	return &workflow.GrantProcessInstanceForDownloadFileHeaders{
+		XAcsDingtalkAccessToken: tea.String(token),
+	}
+}
+
+func newGrantProcessInstanceForDownloadFileRequest(input *GrantProcessInstanceForDownloadFileInput) *workflow.GrantProcessInstanceForDownloadFileRequest {
+	return &workflow.GrantProcessInstanceForDownloadFileRequest{
+		FileId:            tea.String(input.FileId),
+		ProcessInstanceId: tea.String(input.ProcessID),
+	}
+}
+
+func (c *WorkflowClient) GrantProcessInstanceForDownloadFile(input *GrantProcessInstanceForDownloadFileInput) (*GrantProcessInstanceForDownloadFileResp, error) {
+	resp, err := c.client.GrantProcessInstanceForDownloadFileWithOptions(newGrantProcessInstanceForDownloadFileRequest(input),
+		newGrantProcessInstanceForDownloadFileHeaders(c.tokenDetail.Token), &service.RuntimeOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return (*GrantProcessInstanceForDownloadFileResp)(resp.Body), nil
 }
