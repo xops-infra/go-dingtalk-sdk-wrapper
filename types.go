@@ -37,6 +37,9 @@ type CommentInput struct {
 	CommentUserID string      //指评论的人
 }
 
+type CommentResp struct {
+}
+
 type GrantProcessInstanceForDownloadFileInput struct {
 	FileId    string
 	ProcessID string
@@ -82,7 +85,7 @@ type AttachmentFiled struct {
 	SpaceID   string    `json:"spaceId"`
 	FileName  string    `json:"fileName"`
 	Thumbnail Thumbnail `json:"thumbnail"`
-	FileSize  string    `json:"fileSize"`
+	FileSize  int64     `json:"fileSize"`
 	FileType  string    `json:"fileType"`
 	FileID    string    `json:"fileId"`
 }
@@ -128,6 +131,15 @@ func (r *ProcessInstanceResp) GetAttachmentFileIDs() ([]AttachmentFiled, error) 
 		}
 	}
 	return attachFileds, nil
+}
+
+// drop 用户直接在detail获取操作
+func (r *ProcessInstanceResp) GetComment() ([]CommentResp, error) {
+	var comments []CommentResp
+	for _, v := range r.Result.OperationRecords {
+		fmt.Println(v)
+	}
+	return comments, nil
 }
 
 func (r *ProcessInstanceResp) getTasks() ApprovalTask {
