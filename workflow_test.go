@@ -2,17 +2,14 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/alibabacloud-go/tea/tea"
 )
 
 var (
-	processID = "OzF5M2WCTwuiqZhDtB55Og07561678157055"
-	// processID = "l992jCwcRuiY93CAh_xzkw07561677635418" // 有附件
+	// processID = "OzF5M2WCTwuiqZhDtB55Og07561678157055"
+	processID = "l992jCwcRuiY93CAh_xzkw07561677635418" // 有附件
 )
 
 func init() {
@@ -54,7 +51,14 @@ func TestListProcessInstance(t *testing.T) {
 		EndTime:     time.Now().UnixMilli(),
 		MaxResults:  10,
 	})
-	t.Log(tea.Prettify(resp))
+	for _, v := range resp {
+		fmt.Println(v)
+		res, err := client.WorkflowClient.GetProcessInstance(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println(res.IsAgree())
+	}
 }
 
 // test GetProcessInstance
@@ -63,22 +67,16 @@ func TestGetProcessInstance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(resp.GetAttachmentFileIDs())
+	// fmt.Println(resp.GetAttachmentFileIDs())
+	// t.Log(tea.Prettify(resp))
+	fmt.Println(resp.GetComment())
 }
 
-// test GrantProcessInstanceForDownloadFile
-func TestGetAttachment(t *testing.T) {
-	resp, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(&GrantProcessInstanceForDownloadFileInput{
-		ProcessID: processID,
-		FileId:    "98285509057",
-	})
+// test GetAttachmentFileIDs
+func TestGetAttachmentFileIDs(t *testing.T) {
+	resp, err := client.WorkflowClient.GetProcessInstance(processID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(resp)
-	resp2, err := http.Get(*resp.Result.DownloadUri)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(resp2.StatusCode, resp2.Body)
+	fmt.Println(resp.GetAttachmentFileIDs())
 }
