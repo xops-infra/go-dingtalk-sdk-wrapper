@@ -85,7 +85,7 @@ type AttachmentFiled struct {
 	SpaceID   string    `json:"spaceId"`
 	FileName  string    `json:"fileName"`
 	Thumbnail Thumbnail `json:"thumbnail"`
-	FileSize  string    `json:"fileSize"`
+	FileSize  any       `json:"fileSize"`
 	FileType  string    `json:"fileType"`
 	FileID    string    `json:"fileId"`
 }
