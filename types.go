@@ -121,11 +121,11 @@ func (r *ProcessInstanceResp) IsAgree() bool {
 func (r *ProcessInstanceResp) GetAttachmentFileIDs() ([]AttachmentFiled, error) {
 	attachFileds := make([]AttachmentFiled, 0)
 	for _, v := range r.Result.FormComponentValues {
-		if tea.StringValue(v.ComponentType) == "DDAttachment" {
+		if tea.StringValue(v.ComponentType) == "DDAttachment" && v.Value != nil {
 			attachments := []AttachmentFiled{}
 			err := json.Unmarshal([]byte(tea.StringValue(v.Value)), &attachments)
 			if err != nil {
-				return nil, err
+				return attachFileds, err
 			}
 			attachFileds = append(attachFileds, attachments...)
 		}

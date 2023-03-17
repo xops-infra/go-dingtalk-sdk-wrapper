@@ -74,6 +74,7 @@ func TestGetProcessInstance(t *testing.T) {
 
 // test GetAttachmentFileIDs
 func TestGetAttachmentFileIDs(t *testing.T) {
+	// processID = "GOrQpcoBQOKCaksdkL5T8A07561678973120"
 	resp, err := client.WorkflowClient.GetProcessInstance(processID)
 	if err != nil {
 		t.Fatal(err)
