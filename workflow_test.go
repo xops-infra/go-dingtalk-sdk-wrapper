@@ -15,7 +15,7 @@ var (
 	// processID = "l992jCwcRuiY93CAh_xzkw07561677635418" // 有附件
 )
 
-func init() {
+func Init() {
 	config := DingTalkConfig{
 		AppKey:    os.Getenv("dingtalk_id"),
 		AppSecret: os.Getenv("dingtalk_secret"),

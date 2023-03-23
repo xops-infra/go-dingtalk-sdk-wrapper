@@ -9,17 +9,15 @@ var (
 	client *DingTalkClient
 )
 
-func init() {
-	config := DingTalkConfig{
-		AppKey:    "",
-		AppSecret: "",
-	}
-	client = NewDingTalkClient(&config).WithWorkflowClient()
-}
-
 func TestDingTalkClient_SetAccessToken(t *testing.T) {
-	err := client.SetAccessToken()
-	if err != nil {
-		fmt.Println(err)
+	//fmt.Println(client)
+	config := DingTalkConfig{}
+	client = NewDingTalkClient(&config)
+	for {
+		err := client.SetAccessToken()
+		if err != nil {
+			fmt.Println(err)
+		}
+		t.Log("get token success")
 	}
 }

@@ -81,6 +81,9 @@ func (d *DingTalkClient) setAccessToken() error {
 
 func (d *DingTalkClient) SetAccessToken() error {
 	d.Locker.Lock()
+	defer func() {
+		d.Locker.Unlock()
+	}()
 	if d.AccessToken == nil {
 		err := d.setAccessToken()
 		if err != nil {
@@ -92,9 +95,6 @@ func (d *DingTalkClient) SetAccessToken() error {
 		return nil
 	}
 	err := d.setAccessToken()
-	defer func() {
-		d.Locker.Unlock()
-	}()
 	return err
 }
 
