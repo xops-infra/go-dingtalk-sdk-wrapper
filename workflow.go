@@ -96,7 +96,6 @@ func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) []stri
 		if err != nil {
 			continue
 		}
-		fmt.Println(res.Body.Result.List)
 		processIDs = append(processIDs, tea.StringSliceValue(res.Body.Result.List)...)
 		if res.Body.Result.NextToken == nil {
 			break
