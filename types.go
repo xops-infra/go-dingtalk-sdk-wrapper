@@ -27,7 +27,7 @@ type ListWorkflowInput struct {
 	StartTime   int64
 	EndTime     int64
 	NextToken   int64
-	MaxResults  int64
+	Statuses    []ApprovalStatus
 }
 
 type CommentInput struct {
@@ -59,6 +59,17 @@ type Json map[string]interface{}
 
 type ApprovalStatus string
 
+// to string
+func (s ApprovalStatus) String() string {
+	return string(s)
+}
+
+// 流程实例状态，未传值代表查询所有状态的实例ID列表。
+// NEW：新创建
+// RUNNING：审批中
+// TERMINATED：被终止
+// COMPLETED：完成
+// CANCELED：取消
 const (
 	Running    ApprovalStatus = "RUNNING"
 	Completed  ApprovalStatus = "COMPLETED"

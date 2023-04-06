@@ -5,19 +5,21 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 var (
 	// processID = "OzF5M2WCTwuiqZhDtB55Og07561678157055"
 	processID = "l992jCwcRuiY93CAh_xzkw07561677635418" // 有附件
+	client    *DingTalkClient
 )
 
-func Init() {
-	config := DingTalkConfig{
+func init() {
+	client = NewDingTalkClient(&DingTalkConfig{
 		AppKey:    os.Getenv("dingtalk_id"),
 		AppSecret: os.Getenv("dingtalk_secret"),
-	}
-	client = NewDingTalkClient(&config).WithWorkflowClient()
+	}).WithWorkflowClient()
 	err := client.SetAccessToken()
 	if err != nil {
 		panic(err)
@@ -45,19 +47,23 @@ func TestAddComment(t *testing.T) {
 
 // test list
 func TestListProcessInstance(t *testing.T) {
-	resp := client.WorkflowClient.ListProcessInstanceIds(&ListWorkflowInput{
+	fmt.Println("token:", client.WorkflowClient.tokenDetail)
+	resp, err := client.WorkflowClient.ListProcessInstanceIds(&ListWorkflowInput{
 		ProcessCode: "PROC-8FF4478A-DC8D-4922-9B07-36DE233B1DD5",
-		StartTime:   time.Now().AddDate(0, 0, -1).UnixMilli(),
+		StartTime:   time.Now().AddDate(0, 0, -3).UnixMilli(),
 		EndTime:     time.Now().UnixMilli(),
-		MaxResults:  10,
+		Statuses:    []ApprovalStatus{Completed},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, v := range resp {
 		fmt.Println(v)
-		res, err := client.WorkflowClient.GetProcessInstance(v)
-		if err != nil {
-			t.Fatal(err)
-		}
-		fmt.Println(res.IsAgree())
+		// res, err := client.WorkflowClient.GetProcessInstance(v)
+		// if err != nil {
+		// 	t.Fatal(err)
+		// }
+		// fmt.Println(res.IsAgree())
 	}
 }
 
@@ -75,10 +81,22 @@ func TestGetProcessInstance(t *testing.T) {
 // test GetAttachmentFileIDs
 func TestGetAttachmentFileIDs(t *testing.T) {
 	// processID = "GOrQpcoBQOKCaksdkL5T8A07561678973120" // nil
-	processID = "tlfQopnmTGGA0iiD8p1G5Q07561678936579" // filesize string
+	// processID = "tlfQopnmTGGA0iiD8p1G5Q07561678936579" // filesize string
+	processID = "SrqcxV15SUmsGVeUzO5zkA07561676534364" //人员离职
 	resp, err := client.WorkflowClient.GetProcessInstance(processID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(resp.GetAttachmentFileIDs())
+	ids, _ := resp.GetAttachmentFileIDs()
+	for _, v := range ids {
+		fmt.Println(tea.Prettify(v))
+		res, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(&GrantProcessInstanceForDownloadFileInput{
+			FileId:    v.FileID,
+			ProcessID: processID,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println(res.Result.DownloadUri)
+	}
 }

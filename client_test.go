@@ -5,14 +5,10 @@ import (
 	"testing"
 )
 
-var (
-	client *DingTalkClient
-)
-
 func TestDingTalkClient_SetAccessToken(t *testing.T) {
 	//fmt.Println(client)
 	config := DingTalkConfig{}
-	client = NewDingTalkClient(&config)
+	client := NewDingTalkClient(&config)
 	for {
 		err := client.SetAccessToken()
 		if err != nil {

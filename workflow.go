@@ -78,23 +78,28 @@ func newListProcessInstanceIdsHeaders(token string) *workflow.ListProcessInstanc
 }
 
 func newListProcessInstanceIdsRequest(input *ListWorkflowInput) *workflow.ListProcessInstanceIdsRequest {
+	var statuses []string
+	for _, status := range input.Statuses {
+		statuses = append(statuses, string(status))
+	}
 	return &workflow.ListProcessInstanceIdsRequest{
 		ProcessCode: tea.String(input.ProcessCode),
 		StartTime:   tea.Int64(input.StartTime),
 		EndTime:     tea.Int64(input.EndTime),
-		MaxResults:  tea.Int64(input.MaxResults),
+		MaxResults:  tea.Int64(20),
 		NextToken:   tea.Int64(input.NextToken),
+		Statuses:    tea.StringSlice(statuses),
 	}
 }
 
-func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) []string {
+func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) ([]string, error) {
 	var processIDs []string
 	for {
 		res, err := c.client.ListProcessInstanceIdsWithOptions(newListProcessInstanceIdsRequest(input),
 			newListProcessInstanceIdsHeaders(c.tokenDetail.Token),
 			&service.RuntimeOptions{})
 		if err != nil {
-			continue
+			return nil, err
 		}
 		processIDs = append(processIDs, tea.StringSliceValue(res.Body.Result.List)...)
 		if res.Body.Result.NextToken == nil {
@@ -102,7 +107,7 @@ func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) []stri
 		}
 		input.NextToken = cast.ToInt64(tea.StringValue(res.Body.Result.NextToken))
 	}
-	return processIDs
+	return processIDs, nil
 }
 
 // about add comment for processInstance
