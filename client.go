@@ -2,6 +2,7 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
+	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
 	"sync"
 	"time"
 
@@ -42,22 +43,36 @@ type DingTalkClient struct {
 	DingTalkConfig *DingTalkConfig
 	// Needed Client
 	WorkflowClient *WorkflowClient
+	RobotClient    *RobotClient
+	requestBuilder requestBuilder
 }
 
-func NewDingTalkClient(appConfig *DingTalkConfig) *DingTalkClient {
+func NewDingTalkClient(appConfig *DingTalkConfig) (*DingTalkClient, error) {
 	authClient, _ := oauth.NewClient(openapiConfig)
-	return &DingTalkClient{
+
+	dingTalkClient := &DingTalkClient{
 		OpenapiConfig:  newOpenaiConfig(),
 		AuthClient:     authClient,
 		Locker:         new(sync.Mutex),
 		DingTalkConfig: appConfig,
-		AccessToken:    new(TokenDetail),
+		requestBuilder: newRequestBuilder(),
 	}
+	err := dingTalkClient.setAccessToken()
+	if err != nil {
+		return nil, err
+	}
+	return dingTalkClient, nil
 }
 
 func (d *DingTalkClient) WithWorkflowClient() *DingTalkClient {
 	client, _ := workflow.NewClient(openapiConfig)
 	d.WorkflowClient = NewWorkflowClient(client, d.AccessToken)
+	return d
+}
+
+func (d *DingTalkClient) WithRobotClient() *DingTalkClient {
+	client, _ := robot.NewClient(openapiConfig)
+	d.RobotClient = NewRobotClient(client, d.requestBuilder)
 	return d
 }
 
@@ -70,13 +85,21 @@ func (d *DingTalkClient) setAccessToken() error {
 	if err != nil {
 		return fmt.Errorf("获取dingtalk token异常，因为%s", err.Error())
 	}
-	*d.AccessToken = TokenDetail{
+	d.AccessToken = &TokenDetail{
 		Token:    tea.StringValue(res.Body.AccessToken),
-		ExpireIn: tea.Int64Value(res.Body.ExpireIn),
+		ExpireIn: tea.Int64Value(res.Body.ExpireIn) - 10,
 		CreateAt: CreateAt,
 	}
-
 	return nil
+}
+
+func (d *DingTalkClient) CronSetAccessToken() error {
+	if !d.AccessToken.IsExpire() {
+		fmt.Println("过期了")
+		return nil
+	}
+	err := d.setAccessToken()
+	return err
 }
 
 func (d *DingTalkClient) SetAccessToken() error {
@@ -96,6 +119,14 @@ func (d *DingTalkClient) SetAccessToken() error {
 	}
 	err := d.setAccessToken()
 	return err
+}
+
+func (d *DingTalkClient) WorkflowSvc() *WorkflowClient {
+	return d.WorkflowClient
+}
+
+func (d *DingTalkClient) RobotSvc() *RobotClient {
+	return d.RobotClient
 }
 
 //func (d *DingTalkClient) RefreshAccessToken() error {

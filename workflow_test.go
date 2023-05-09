@@ -2,11 +2,8 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
-
-	"github.com/alibabacloud-go/tea/tea"
 )
 
 var (
@@ -15,15 +12,12 @@ var (
 	client    *DingTalkClient
 )
 
-func init() {
-	client = NewDingTalkClient(&DingTalkConfig{
-		AppKey:    os.Getenv("dingtalk_id"),
-		AppSecret: os.Getenv("dingtalk_secret"),
-	}).WithWorkflowClient()
-	err := client.SetAccessToken()
-	if err != nil {
-		panic(err)
-	}
+func Init() {
+	client, _ = NewDingTalkClient(&DingTalkConfig{
+		AppKey:    "xx",
+		AppSecret: "xx",
+	})
+	client.WithWorkflowClient()
 }
 
 func TestAddComment(t *testing.T) {
@@ -58,12 +52,7 @@ func TestListProcessInstance(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, v := range resp {
-		fmt.Println(v)
-		// res, err := client.WorkflowClient.GetProcessInstance(v)
-		// if err != nil {
-		// 	t.Fatal(err)
-		// }
-		// fmt.Println(res.IsAgree())
+		t.Log(v)
 	}
 }
 
@@ -73,15 +62,11 @@ func TestGetProcessInstance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// fmt.Println(resp.GetAttachmentFileIDs())
-	// t.Log(tea.Prettify(resp))
-	fmt.Println(resp.GetComment())
+	t.Log(resp.GetComment())
 }
 
 // test GetAttachmentFileIDs
 func TestGetAttachmentFileIDs(t *testing.T) {
-	// processID = "GOrQpcoBQOKCaksdkL5T8A07561678973120" // nil
-	// processID = "tlfQopnmTGGA0iiD8p1G5Q07561678936579" // filesize string
 	processID = "SrqcxV15SUmsGVeUzO5zkA07561676534364" //人员离职
 	resp, err := client.WorkflowClient.GetProcessInstance(processID)
 	if err != nil {
@@ -89,7 +74,6 @@ func TestGetAttachmentFileIDs(t *testing.T) {
 	}
 	ids, _ := resp.GetAttachmentFileIDs()
 	for _, v := range ids {
-		fmt.Println(tea.Prettify(v))
 		res, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(&GrantProcessInstanceForDownloadFileInput{
 			FileId:    v.FileID,
 			ProcessID: processID,
@@ -97,6 +81,6 @@ func TestGetAttachmentFileIDs(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		fmt.Println(res.Result.DownloadUri)
+		t.Log(res.Result.DownloadUri)
 	}
 }
