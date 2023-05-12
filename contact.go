@@ -5,6 +5,7 @@ package go_dingtalk_sdk_wrapper
 */
 
 import (
+	"context"
 	contact "github.com/alibabacloud-go/dingtalk/contact_1_0"
 	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
@@ -23,7 +24,7 @@ func NewContactClient(client *contact.Client, token *TokenDetail) *ContactClient
 }
 
 // DepartmentList 403 forbidden
-func (c *ContactClient) DepartmentList() ([]*int64, error) {
+func (c *ContactClient) DepartmentList(ctx context.Context) ([]*int64, error) {
 	searchDepartmentHeaders := &contact.SearchDepartmentHeaders{
 		XAcsDingtalkAccessToken: tea.String(c.tokenDetail.Token),
 	}

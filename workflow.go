@@ -1,6 +1,7 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"context"
 	"fmt"
 
 	workflow "github.com/alibabacloud-go/dingtalk/workflow_1_0"
@@ -35,7 +36,7 @@ func newGetProcessInstanceRequest(
 	}
 }
 
-func (c *WorkflowClient) GetProcessInstance(
+func (c *WorkflowClient) GetProcessInstance(ctx context.Context,
 	processID string) (*ProcessInstanceResp, error) {
 	resp, err := c.client.GetProcessInstanceWithOptions(newGetProcessInstanceRequest(
 		processID), newGetProcessInstanceHeader(c.tokenDetail.Token), &service.RuntimeOptions{})
@@ -60,7 +61,7 @@ func newTerminateProcessInstanceRequest(
 	}
 }
 
-func (c *WorkflowClient) TerminateProcessInstance(
+func (c *WorkflowClient) TerminateProcessInstance(ctx context.Context,
 	processID string) (bool, error) {
 	resp, err := c.client.TerminateProcessInstanceWithOptions(newTerminateProcessInstanceRequest(
 		processID), newTerminateProcessInstanceHeader(c.tokenDetail.Token), &service.RuntimeOptions{})
@@ -92,7 +93,7 @@ func newListProcessInstanceIdsRequest(input *ListWorkflowInput) *workflow.ListPr
 	}
 }
 
-func (c *WorkflowClient) ListProcessInstanceIds(input *ListWorkflowInput) ([]string, error) {
+func (c *WorkflowClient) ListProcessInstanceIds(ctx context.Context, input *ListWorkflowInput) ([]string, error) {
 	var processIDs []string
 	for {
 		res, err := c.client.ListProcessInstanceIdsWithOptions(newListProcessInstanceIdsRequest(input),
@@ -125,7 +126,7 @@ func newAddProcessInstanceCommentRequest(input *CommentInput) *workflow.AddProce
 	}
 }
 
-func (c *WorkflowClient) AddProcessInstancedComment(input *CommentInput) error {
+func (c *WorkflowClient) AddProcessInstancedComment(ctx context.Context, input *CommentInput) error {
 	_, err := c.client.AddProcessInstanceCommentWithOptions(newAddProcessInstanceCommentRequest(input),
 		newAddProcessInstanceCommentHeaders(c.tokenDetail.Token), &service.RuntimeOptions{})
 	return err
@@ -145,7 +146,7 @@ func newGrantProcessInstanceForDownloadFileRequest(input *GrantProcessInstanceFo
 	}
 }
 
-func (c *WorkflowClient) GrantProcessInstanceForDownloadFile(input *GrantProcessInstanceForDownloadFileInput) (*GrantProcessInstanceForDownloadFileResp, error) {
+func (c *WorkflowClient) GrantProcessInstanceForDownloadFile(ctx context.Context, input *GrantProcessInstanceForDownloadFileInput) (*GrantProcessInstanceForDownloadFileResp, error) {
 	resp, err := c.client.GrantProcessInstanceForDownloadFileWithOptions(newGrantProcessInstanceForDownloadFileRequest(input),
 		newGrantProcessInstanceForDownloadFileHeaders(c.tokenDetail.Token), &service.RuntimeOptions{})
 	if err != nil {

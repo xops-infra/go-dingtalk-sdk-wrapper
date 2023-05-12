@@ -76,7 +76,7 @@ type SendMessageRequest struct {
 	MessageContent MessageContent `json:"message_content"`
 }
 
-func (c *RobotClient) SendMessage(req *SendMessageRequest) (err error) {
+func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) (err error) {
 	var (
 		resp LowApiError
 		url  string
