@@ -1,9 +1,13 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
+
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 var (
@@ -12,12 +16,49 @@ var (
 	client    *DingTalkClient
 )
 
-func Init() {
+// you should set env: dingtalk_id, dingtalk_secret
+func init() {
+	fmt.Println(os.Getenv("dingtalk_id"), os.Getenv("dingtalk_secret"))
 	client, _ = NewDingTalkClient(&DingTalkConfig{
-		AppKey:    "xx",
-		AppSecret: "xx",
+		AppKey:    os.Getenv("dingtalk_id"),
+		AppSecret: os.Getenv("dingtalk_secret"),
 	})
-	client.WithWorkflowClient()
+	client.WithWorkflowClient().WithMiniProgramClient(2536640643)
+}
+
+// Test SendWorkNotification
+func TestSendWorkNotification(t *testing.T) {
+	req := SendWorkNotificationRequest{
+		UseridList: tea.String("xxx"),
+		ToAllUser:  tea.Bool(false),
+		Msg: &MessageContent{
+			MsgType: "text",
+			Text: TextBody{
+				Content: "this is a test for pop.",
+			},
+		},
+	}
+	err := client.MiniProgram.SendWorkNotification(context.Background(), &req)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+// Test SendGroupNotification
+func TestSendGroupNotification(t *testing.T) {
+	req := SendGroupNotificationRequest{
+		ChatId: tea.String(""),
+		Msg: &MessageContent{
+			MsgType: "text",
+			Text: TextBody{
+				Content: "this is a test for pop.",
+			},
+		},
+	}
+	err := client.MiniProgram.SendGroupNotification(context.Background(), &req)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestAddComment(t *testing.T) {
@@ -29,22 +70,21 @@ func TestAddComment(t *testing.T) {
 		CommentUserID: "xx",
 	}
 	fmt.Println(client.WorkflowClient)
-	resp, _ := client.WorkflowClient.GetProcessInstance(processID)
+	resp, _ := client.WorkflowClient.GetProcessInstance(context.Background(), processID)
 	if resp.IsAgree() {
 		t.Log("approved")
 	} else {
 		t.Log("not approved")
 	}
-	err := client.WorkflowClient.AddProcessInstancedComment(&comment)
+	err := client.WorkflowClient.AddProcessInstancedComment(context.Background(), &comment)
 	t.Log(err)
 }
 
 // test list
 func TestListProcessInstance(t *testing.T) {
-	fmt.Println("token:", client.WorkflowClient.tokenDetail)
-	resp, err := client.WorkflowClient.ListProcessInstanceIds(&ListWorkflowInput{
-		ProcessCode: "PROC-8FF4478A-DC8D-4922-9B07-36DE233B1DD5",
-		StartTime:   time.Now().AddDate(0, 0, -3).UnixMilli(),
+	resp, err := client.WorkflowClient.ListProcessInstanceIds(context.Background(), &ListWorkflowInput{
+		ProcessCode: "PROC-B85623B4-A372-4684-BB61-1B7E046CE9A8",
+		StartTime:   time.Now().AddDate(0, 0, -7).UnixMilli(),
 		EndTime:     time.Now().UnixMilli(),
 		Statuses:    []ApprovalStatus{Completed},
 	})
@@ -52,13 +92,18 @@ func TestListProcessInstance(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, v := range resp {
-		t.Log(v)
+		resp, err := client.WorkflowClient.GetProcessInstance(context.Background(), v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println(tea.Prettify(resp))
+		break
 	}
 }
 
 // test GetProcessInstance
 func TestGetProcessInstance(t *testing.T) {
-	resp, err := client.WorkflowClient.GetProcessInstance(processID)
+	resp, err := client.WorkflowClient.GetProcessInstance(context.Background(), processID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,13 +113,13 @@ func TestGetProcessInstance(t *testing.T) {
 // test GetAttachmentFileIDs
 func TestGetAttachmentFileIDs(t *testing.T) {
 	processID = "SrqcxV15SUmsGVeUzO5zkA07561676534364" //人员离职
-	resp, err := client.WorkflowClient.GetProcessInstance(processID)
+	resp, err := client.WorkflowClient.GetProcessInstance(context.Background(), processID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ids, _ := resp.GetAttachmentFileIDs()
 	for _, v := range ids {
-		res, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(&GrantProcessInstanceForDownloadFileInput{
+		res, err := client.WorkflowClient.GrantProcessInstanceForDownloadFile(context.Background(), &GrantProcessInstanceForDownloadFileInput{
 			FileId:    v.FileID,
 			ProcessID: processID,
 		})

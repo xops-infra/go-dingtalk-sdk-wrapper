@@ -1,6 +1,7 @@
 package go_dingtalk_sdk_wrapper
 
 import (
+	"context"
 	"testing"
 )
 
@@ -24,7 +25,7 @@ func TestRobot(t *testing.T) {
 			},
 		},
 	}
-	err = client.RobotSvc().SendMessage(&req)
+	err = client.RobotSvc().SendMessage(context.Background(), &req)
 	if err != nil {
 		t.Error(err)
 	}

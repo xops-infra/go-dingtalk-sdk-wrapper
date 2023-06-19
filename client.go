@@ -2,9 +2,10 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"fmt"
-	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
 	"sync"
 	"time"
+
+	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
 
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	oauth "github.com/alibabacloud-go/dingtalk/oauth2_1_0"
@@ -44,6 +45,7 @@ type DingTalkClient struct {
 	// Needed Client
 	WorkflowClient *WorkflowClient
 	RobotClient    *RobotClient
+	MiniProgram    MiniProgram
 	requestBuilder requestBuilder
 }
 
@@ -73,6 +75,11 @@ func (d *DingTalkClient) WithWorkflowClient() *DingTalkClient {
 func (d *DingTalkClient) WithRobotClient() *DingTalkClient {
 	client, _ := robot.NewClient(openapiConfig)
 	d.RobotClient = NewRobotClient(client, d.requestBuilder)
+	return d
+}
+
+func (d *DingTalkClient) WithMiniProgramClient(agentId int64) *DingTalkClient {
+	d.MiniProgram = NewMiniProgram(agentId, d.requestBuilder, d.AccessToken.Token)
 	return d
 }
 

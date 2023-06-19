@@ -208,3 +208,12 @@ func (t ApprovalTask) Swap(i, j int) {
 //func (r *MemoryCache) Get() error {
 //	return nil
 //}
+
+type CommonResponse struct {
+	ErrCode int    `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
+	// task_id
+	TaskId int `json:"task_id"` // 发送任务的id
+	// request_id
+	RequestId string `json:"request_id"` // 请求id
+}
