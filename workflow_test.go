@@ -84,7 +84,7 @@ func TestAddComment(t *testing.T) {
 func TestListProcessInstance(t *testing.T) {
 	resp, err := client.WorkflowClient.ListProcessInstanceIds(context.Background(), &ListWorkflowInput{
 		ProcessCode: "PROC-B85623B4-A372-4684-BB61-1B7E046CE9A8",
-		StartTime:   time.Now().AddDate(0, 0, -7).UnixMilli(),
+		StartTime:   time.Now().AddDate(0, 0, -20).UnixMilli(),
 		EndTime:     time.Now().UnixMilli(),
 		Statuses:    []ApprovalStatus{Completed},
 	})

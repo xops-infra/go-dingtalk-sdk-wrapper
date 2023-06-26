@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -61,6 +62,11 @@ func (b *httpRequestBuilder) sendRequest(req *http.Request, v any) error {
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		body := new(string)
+		decodeResponse(res.Body, body)
+		return fmt.Errorf("response status code: %d,%s", res.StatusCode, *body)
 	}
 
 	defer res.Body.Close()

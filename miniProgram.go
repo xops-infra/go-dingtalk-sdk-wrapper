@@ -13,10 +13,6 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 )
 
-var (
-	ErrEmptyAccessToken = fmt.Errorf("empty access token")
-)
-
 type SendWorkNotificationRequest struct {
 	// agent_id
 	AgentId *int64 `json:"agent_id" required:"true"` // 应用agentId。 12345

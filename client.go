@@ -46,6 +46,7 @@ type DingTalkClient struct {
 	WorkflowClient *WorkflowClient
 	RobotClient    *RobotClient
 	MiniProgram    MiniProgram
+	Workflow       Workflow
 	requestBuilder requestBuilder
 }
 
@@ -80,6 +81,11 @@ func (d *DingTalkClient) WithRobotClient() *DingTalkClient {
 
 func (d *DingTalkClient) WithMiniProgramClient(agentId int64) *DingTalkClient {
 	d.MiniProgram = NewMiniProgram(agentId, d.requestBuilder, d.AccessToken.Token)
+	return d
+}
+
+func (d *DingTalkClient) WithWorkflowClientV2() *DingTalkClient {
+	d.Workflow = NewWorkflowV2(d.requestBuilder, d.AccessToken.Token)
 	return d
 }
 
