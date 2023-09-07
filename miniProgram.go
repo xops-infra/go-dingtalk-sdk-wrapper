@@ -34,12 +34,12 @@ type MiniProgram interface {
 }
 
 type miniProgram struct {
-	// agent_id
 	agentId        int64 // 应用agentId。 12345
 	accessToken    string
 	requestBuilder requestBuilder
 }
 
+// agentId 应用程序的agentId，后台查看
 func NewMiniProgram(agentId int64, requestBuilder requestBuilder, accessToken string) MiniProgram {
 	return &miniProgram{
 		agentId:        agentId,
