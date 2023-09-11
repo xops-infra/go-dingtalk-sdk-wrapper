@@ -31,7 +31,7 @@ func main() {
 	}()
 
 	usersAll := make(map[string]*dt.UserInfo, 0)
-	departIDChan := make(chan int64, 100)
+	departIDChan := make(chan int64, 2000) // 如果发现 chan 夯住了，可以跳大。
 	go getDepart(departIDChan)
 	for depart := range departIDChan {
 		departRes, err := client.Depart.GetDepartmentIDs(&dt.GetDepartmentsIDInput{
@@ -45,7 +45,7 @@ func main() {
 		}
 		users, err := client.User.GetUsers(&dt.GetUsersInput{
 			DeptID: depart,
-			Size:   100,
+			Size:   20,
 			Cursor: 0,
 		})
 		if err != nil {
