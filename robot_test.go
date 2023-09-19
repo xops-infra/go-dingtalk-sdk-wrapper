@@ -2,29 +2,36 @@ package go_dingtalk_sdk_wrapper
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
+
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 func TestRobot(t *testing.T) {
 	config := DingTalkConfig{
-		AppKey:    "xx",
-		AppSecret: "xx",
+		AppKey:    os.Getenv("dingtalk_id"),
+		AppSecret: os.Getenv("dingtalk_secret"),
 	}
 	client, err := NewDingTalkClient(&config)
 	if err != nil {
 		t.Error(err)
 	}
 	client.WithRobotClient()
-
 	req := SendMessageRequest{
-		AccessToken: "6962dd0a0510e905c3c40c015a72f171c2d641209a87eccc7b4f82155cba0176",
+		AccessToken: "xxxx",
 		MessageContent: MessageContent{
 			MsgType: "text",
 			Text: TextBody{
-				Content: "费用告警",
+				Content: "任务 是个@的测试",
+			},
+			At: AtBody{
+				AtUserIDS: []string{"29070242122092575562"},
 			},
 		},
 	}
+	fmt.Println(tea.Prettify(req.MessageContent))
 	err = client.RobotSvc().SendMessage(context.Background(), &req)
 	if err != nil {
 		t.Error(err)

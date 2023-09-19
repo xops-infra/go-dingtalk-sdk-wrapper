@@ -42,7 +42,7 @@ func TestCreateProcessInstance(t *testing.T) {
 				Value: "test by patsnapops.",
 			},
 		},
-	})
+	}, client.AccessToken.Token)
 	if err != nil {
 		t.Error(err)
 	}

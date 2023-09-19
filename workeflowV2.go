@@ -25,17 +25,15 @@ type FormComponentValue struct {
 
 type Workflow interface {
 	// 创建审批实例
-	CreateProcessInstance(input *CreateProcessInstanceInput) (string, error)
+	CreateProcessInstance(input *CreateProcessInstanceInput, accessToken string) (string, error)
 }
 
 type workflowClient struct {
-	accessToken    string
 	requestBuilder requestBuilder
 }
 
-func NewWorkflowV2(requestBuilder requestBuilder, accessToken string) Workflow {
+func NewWorkflowV2(requestBuilder requestBuilder) Workflow {
 	return &workflowClient{
-		accessToken:    accessToken,
 		requestBuilder: requestBuilder,
 	}
 }
@@ -45,14 +43,14 @@ type CreateProcessInstanceResponse struct {
 }
 
 // 创建审批实例
-func (c *workflowClient) CreateProcessInstance(input *CreateProcessInstanceInput) (string, error) {
+func (c *workflowClient) CreateProcessInstance(input *CreateProcessInstanceInput, accessToken string) (string, error) {
 	var response CreateProcessInstanceResponse
 	url := "https://api.dingtalk.com/v1.0/workflow/processInstances"
 	build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, input)
 	if err != nil {
 		return "", err
 	}
-	build.Header.Set("x-acs-dingtalk-access-token", c.accessToken)
+	build.Header.Set("x-acs-dingtalk-access-token", accessToken)
 	build.Header.Set("Content-Type", "application/json")
 	fmt.Println(build.Body)
 	err = c.requestBuilder.sendRequest(build, &response)

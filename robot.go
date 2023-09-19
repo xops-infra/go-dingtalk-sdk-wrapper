@@ -1,11 +1,13 @@
 package go_dingtalk_sdk_wrapper
 
+// https://open.dingtalk.com/document/orgapp/custom-robots-send-group-messages
 import (
 	"context"
 	"fmt"
-	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
 	"net/http"
 	"time"
+
+	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
 )
 
 type RobotClient struct {
@@ -21,53 +23,53 @@ func NewRobotClient(client *robot.Client, builder requestBuilder) *RobotClient {
 }
 
 type TextBody struct {
-	Content string `json:"content,omitempty"`
+	Content string `json:"content"`
 }
 
 type AtBody struct {
-	IsAtAll   bool     `json:"isAtAll,omitempty"`
-	AtMobiles []string `json:"atMobiles,omitempty"`
-	AtUserIDS []string `json:"atUserIDS,omitempty"`
+	IsAtAll   bool     `json:"isAtAll"`
+	AtMobiles []string `json:"atMobiles"`
+	AtUserIDS []string `json:"atUserIds"`
 }
 
 type LinkBody struct {
-	MessageUrl string `json:"messageUrl,omitempty"`
-	Title      string `json:"title,omitempty"`
-	PicUrl     string `json:"picUrl,omitempty"`
-	Text       string `json:"text,omitempty"`
+	MessageUrl string `json:"messageUrl"`
+	Title      string `json:"title"`
+	PicUrl     string `json:"picUrl"`
+	Text       string `json:"text"`
 }
 
 type MarkDownBody struct {
-	Title string `json:"title,omitempty"`
-	Text  string `json:"text,omitempty"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 type BtnBody struct {
-	ActionURL string `json:"actionURL,omitempty"`
-	Title     string `json:"title,omitempty"`
+	ActionURL string `json:"actionURL"`
+	Title     string `json:"title"`
 }
 
 type ActionCardBody struct {
-	HideAvatar     string    `json:"hideAvatar,omitempty"`
-	BtnOrientation string    `json:"btnOrientation,omitempty"`
-	Single         string    `json:"singleURL,omitempty"`
-	SingleTitle    string    `json:"singleTitle,omitempty"`
-	Title          string    `json:"title,omitempty"`
-	Text           string    `json:"text,omitempty"`
-	Btns           []BtnBody `json:"btns,omitempty"`
+	HideAvatar     string    `json:"hideAvatar"`
+	BtnOrientation string    `json:"btnOrientation"`
+	Single         string    `json:"singleURL"`
+	SingleTitle    string    `json:"singleTitle"`
+	Title          string    `json:"title"`
+	Text           string    `json:"text"`
+	Btns           []BtnBody `json:"btns"`
 }
 
 type FeedCard struct {
-	Links []LinkBody `json:"links,omitempty"`
+	Links []LinkBody `json:"links"`
 }
 
 type MessageContent struct {
 	MsgType    string         `json:"msgtype"`
-	Text       TextBody       `json:"text,omitempty"`
-	At         AtBody         `json:"atMobiles,omitempty"`
-	Link       LinkBody       `json:"link,omitempty"`
-	MarkDown   MarkDownBody   `json:"markdown,omitempty"`
-	ActionCard ActionCardBody `json:"actionCard,omitempty"`
+	Text       TextBody       `json:"text"`
+	At         AtBody         `json:"at"`
+	Link       LinkBody       `json:"link"`
+	MarkDown   MarkDownBody   `json:"markdown"`
+	ActionCard ActionCardBody `json:"actionCard"`
 }
 
 type SendMessageRequest struct {

@@ -82,22 +82,22 @@ func (d *DingTalkClient) WithRobotClient() *DingTalkClient {
 }
 
 func (d *DingTalkClient) WithMiniProgramClient(agentId int64) *DingTalkClient {
-	d.MiniProgram = NewMiniProgram(agentId, d.requestBuilder, d.AccessToken.Token)
+	d.MiniProgram = NewMiniProgram(agentId, d.requestBuilder)
 	return d
 }
 
 func (d *DingTalkClient) WithWorkflowClientV2() *DingTalkClient {
-	d.Workflow = NewWorkflowV2(d.requestBuilder, d.AccessToken.Token)
+	d.Workflow = NewWorkflowV2(d.requestBuilder)
 	return d
 }
 
 func (d *DingTalkClient) WithDepartClient() *DingTalkClient {
-	d.Depart = NewDepart(d.requestBuilder, d.AccessToken.Token)
+	d.Depart = NewDepart(d.requestBuilder)
 	return d
 }
 
 func (d *DingTalkClient) WithUserClient() *DingTalkClient {
-	d.User = NewUser(d.requestBuilder, d.AccessToken.Token)
+	d.User = NewUser(d.requestBuilder)
 	return d
 }
 

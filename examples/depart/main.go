@@ -23,6 +23,7 @@ func init() {
 }
 
 func main() {
+	token := client.AccessToken.Token
 	// err recover
 	defer func() {
 		if err := recover(); err != nil {
@@ -36,7 +37,7 @@ func main() {
 	for depart := range departIDChan {
 		departRes, err := client.Depart.GetDepartmentIDs(&dt.GetDepartmentsIDInput{
 			DeptID: depart,
-		})
+		}, token)
 		if err != nil {
 			panic(err)
 		}
@@ -47,7 +48,7 @@ func main() {
 			DeptID: depart,
 			Size:   20,
 			Cursor: 0,
-		})
+		}, token)
 		if err != nil {
 			panic(err)
 		}
@@ -59,10 +60,11 @@ func main() {
 }
 
 func getDepart(c chan int64) {
+	token := client.AccessToken.Token
 	input := &dt.GetDepartmentsIDInput{
 		DeptID: int64(1),
 	}
-	departRes, err := client.Depart.GetDepartmentIDs(input)
+	departRes, err := client.Depart.GetDepartmentIDs(input, token)
 	if err != nil {
 		panic(err)
 	}

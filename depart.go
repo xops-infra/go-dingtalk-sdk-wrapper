@@ -52,28 +52,26 @@ type GetDepartmentsResponse struct {
 }
 
 type departmentClient struct {
-	accessToken    string
 	requestBuilder requestBuilder
 }
 
 type Depart interface {
 	// 获取部门列表
-	GetDepartments(*GetDepartmentsInput) ([]*Department, error)
+	GetDepartments(*GetDepartmentsInput, string) ([]*Department, error)
 	// 获取子部门ID列表
-	GetDepartmentIDs(*GetDepartmentsIDInput) ([]int64, error)
+	GetDepartmentIDs(*GetDepartmentsIDInput, string) ([]int64, error)
 }
 
-func NewDepart(requestBuilder requestBuilder, accessToken string) Depart {
+func NewDepart(requestBuilder requestBuilder) Depart {
 	return &departmentClient{
 		requestBuilder: requestBuilder,
-		accessToken:    accessToken,
 	}
 }
 
-func (c *departmentClient) GetDepartments(input *GetDepartmentsInput) ([]*Department, error) {
+func (c *departmentClient) GetDepartments(input *GetDepartmentsInput, accessToken string) ([]*Department, error) {
 	var departments []*Department
 	var response GetDepartmentsResponse
-	url := "https://oapi.dingtalk.com/topapi/v2/department/listsub?access_token=" + c.accessToken
+	url := "https://oapi.dingtalk.com/topapi/v2/department/listsub?access_token=" + accessToken
 	build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, input)
 	if err != nil {
 		return nil, err
@@ -86,10 +84,10 @@ func (c *departmentClient) GetDepartments(input *GetDepartmentsInput) ([]*Depart
 	return departments, nil
 }
 
-func (c *departmentClient) GetDepartmentIDs(input *GetDepartmentsIDInput) ([]int64, error) {
+func (c *departmentClient) GetDepartmentIDs(input *GetDepartmentsIDInput, accessToken string) ([]int64, error) {
 	var subDepartments []int64
 	var response GetDepartmentsIDResponse
-	url := "https://oapi.dingtalk.com/topapi/v2/department/listsubid?access_token=" + c.accessToken
+	url := "https://oapi.dingtalk.com/topapi/v2/department/listsubid?access_token=" + accessToken
 	build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, input)
 	if err != nil {
 		return nil, err

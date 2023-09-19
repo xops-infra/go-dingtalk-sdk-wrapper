@@ -28,30 +28,28 @@ type SendWorkNotificationRequest struct {
 
 type MiniProgram interface {
 	// 使用机器人发送工作通知
-	SendWorkNotification(ctx context.Context, req *SendWorkNotificationRequest) error
+	SendWorkNotification(ctx context.Context, req *SendWorkNotificationRequest, accessToken string) error
 	// 发送到群会话，
-	SendGroupNotification(ctx context.Context, req *SendGroupNotificationRequest) error //发送消息到企业群接口相关文档，已于2022年09月23日迁移至历史文档（不推荐）目录。不再支持新应用接入，已接入的应用可以正常调用。
+	SendGroupNotification(ctx context.Context, req *SendGroupNotificationRequest, accessToken string) error //发送消息到企业群接口相关文档，已于2022年09月23日迁移至历史文档（不推荐）目录。不再支持新应用接入，已接入的应用可以正常调用。
 }
 
 type miniProgram struct {
 	agentId        int64 // 应用agentId。 12345
-	accessToken    string
 	requestBuilder requestBuilder
 }
 
 // agentId 应用程序的agentId，后台查看
-func NewMiniProgram(agentId int64, requestBuilder requestBuilder, accessToken string) MiniProgram {
+func NewMiniProgram(agentId int64, requestBuilder requestBuilder) MiniProgram {
 	return &miniProgram{
 		agentId:        agentId,
 		requestBuilder: requestBuilder,
-		accessToken:    accessToken,
 	}
 }
 
-func (m *miniProgram) SendWorkNotification(ctx context.Context, req *SendWorkNotificationRequest) error {
+func (m *miniProgram) SendWorkNotification(ctx context.Context, req *SendWorkNotificationRequest, accessToken string) error {
 	var response CommonResponse
 	req.AgentId = tea.Int64(m.agentId)
-	url := fmt.Sprintf("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token=%s", m.accessToken)
+	url := fmt.Sprintf("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token=%s", accessToken)
 	build, err := m.requestBuilder.build(context.Background(), http.MethodPost, url, req)
 	if err != nil {
 		return err
@@ -73,9 +71,9 @@ type SendGroupNotificationRequest struct {
 	Msg *MessageContent `json:"msg" required:"true"` // 消息内容，消息类型和样例可参考“消息类型与数据格式”。最长不超过2048个字节
 }
 
-func (m *miniProgram) SendGroupNotification(ctx context.Context, req *SendGroupNotificationRequest) error {
+func (m *miniProgram) SendGroupNotification(ctx context.Context, req *SendGroupNotificationRequest, accessToken string) error {
 	var response CommonResponse
-	url := fmt.Sprintf("https://oapi.dingtalk.com/chat/send?access_token=%s", m.accessToken)
+	url := fmt.Sprintf("https://oapi.dingtalk.com/chat/send?access_token=%s", accessToken)
 	build, err := m.requestBuilder.build(context.Background(), http.MethodPost, url, req)
 	if err != nil {
 		return err

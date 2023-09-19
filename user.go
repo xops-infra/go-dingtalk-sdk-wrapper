@@ -7,7 +7,7 @@ import (
 
 type User interface {
 	// 获取部门id的用户信息
-	GetUsers(*GetUsersInput) ([]*UserInfo, error)
+	GetUsers(*GetUsersInput, string) ([]*UserInfo, error)
 }
 
 type UserInfo struct {
@@ -61,20 +61,18 @@ type UserInfo struct {
 
 type UserClient struct {
 	requestBuilder requestBuilder
-	accessToken    string
 }
 
-func NewUser(requestBuilder requestBuilder, accessToken string) User {
+func NewUser(requestBuilder requestBuilder) User {
 	return &UserClient{
 		requestBuilder: requestBuilder,
-		accessToken:    accessToken,
 	}
 }
 
-func (c *UserClient) GetUsers(input *GetUsersInput) ([]*UserInfo, error) {
+func (c *UserClient) GetUsers(input *GetUsersInput, accessToken string) ([]*UserInfo, error) {
 	var users []*UserInfo
 	var response GetUsersResponse
-	url := "https://oapi.dingtalk.com/topapi/v2/user/list?access_token=" + c.accessToken
+	url := "https://oapi.dingtalk.com/topapi/v2/user/list?access_token=" + accessToken
 	for {
 		build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, input)
 		if err != nil {

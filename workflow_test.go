@@ -38,7 +38,7 @@ func TestSendWorkNotification(t *testing.T) {
 			},
 		},
 	}
-	err := client.MiniProgram.SendWorkNotification(context.Background(), &req)
+	err := client.MiniProgram.SendWorkNotification(context.Background(), &req, client.AccessToken.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -55,7 +55,7 @@ func TestSendGroupNotification(t *testing.T) {
 			},
 		},
 	}
-	err := client.MiniProgram.SendGroupNotification(context.Background(), &req)
+	err := client.MiniProgram.SendGroupNotification(context.Background(), &req, client.AccessToken.Token)
 	if err != nil {
 		t.Error(err)
 	}
