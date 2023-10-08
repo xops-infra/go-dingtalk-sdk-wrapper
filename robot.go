@@ -78,7 +78,7 @@ type SendMessageRequest struct {
 	MessageContent MessageContent `json:"message_content"`
 }
 
-func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) (err error) {
+func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) error {
 	var (
 		resp LowApiError
 		url  string
@@ -93,11 +93,14 @@ func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) 
 
 	build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, req.MessageContent)
 	if err != nil {
-		return
+		return err
 	}
 	err = c.requestBuilder.sendRequest(build, &resp)
 	if err != nil {
-		return
+		return err
 	}
-	return &resp
+	if resp.ErrCode != 0 {
+		return fmt.Errorf("%s", resp.ErrMsg)
+	}
+	return nil
 }
