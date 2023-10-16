@@ -8,6 +8,7 @@ import (
 	"time"
 
 	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
+	"github.com/alibabacloud-go/tea/tea"
 )
 
 type RobotClient struct {
@@ -78,6 +79,7 @@ type SendMessageRequest struct {
 	MessageContent MessageContent `json:"message_content"`
 }
 
+// todo 使用 robot.Client 发送消息，而不要使用 http client
 func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) error {
 	var (
 		resp LowApiError
@@ -103,4 +105,16 @@ func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) 
 		return fmt.Errorf("%s", resp.ErrMsg)
 	}
 	return nil
+}
+
+func (c *RobotClient) DownloadMessageFile(ctx context.Context, downloadCode, robotCode string) (*string, error) {
+	req := robot.RobotMessageFileDownloadRequest{
+		DownloadCode: tea.String(downloadCode),
+		RobotCode:    tea.String(robotCode),
+	}
+	resp, err := c.client.RobotMessageFileDownload(&req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Body.DownloadUrl, nil
 }
