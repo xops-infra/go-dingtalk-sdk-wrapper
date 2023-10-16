@@ -8,6 +8,7 @@ import (
 	"time"
 
 	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
+	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
@@ -79,7 +80,18 @@ type SendMessageRequest struct {
 	MessageContent MessageContent `json:"message_content"`
 }
 
-// todo 使用 robot.Client 发送消息，而不要使用 http client
+// func (c *RobotClient) SendMessageV2(ctx context.Context, req *SendMessageRequest) error {
+// 	request := robot.SendRobotDingMessageRequest{
+// 		RobotCode: tea.String(req.AccessToken),
+// 	}
+// 	resp, err := c.client.SendRobotDingMessage(&request)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	fmt.Println(tea.Prettify(resp))
+// 	return nil
+// }
+
 func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) error {
 	var (
 		resp LowApiError
@@ -107,12 +119,15 @@ func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) 
 	return nil
 }
 
-func (c *RobotClient) DownloadMessageFile(ctx context.Context, downloadCode, robotCode string) (*string, error) {
+// todo: 官方垃圾接口。没能设置 header token,RobotMessageFileDownload也不行
+func (c *RobotClient) GetDownloadMessageFileUrl(ctx context.Context, downloadCode, robotCode string) (*string, error) {
 	req := robot.RobotMessageFileDownloadRequest{
 		DownloadCode: tea.String(downloadCode),
 		RobotCode:    tea.String(robotCode),
 	}
-	resp, err := c.client.RobotMessageFileDownload(&req)
+	resp, err := c.client.RobotMessageFileDownloadWithOptions(&req, &robot.RobotMessageFileDownloadHeaders{
+		XAcsDingtalkAccessToken: tea.String("123123"),
+	}, &service.RuntimeOptions{})
 	if err != nil {
 		return nil, err
 	}

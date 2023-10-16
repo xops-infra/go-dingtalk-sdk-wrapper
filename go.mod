@@ -7,7 +7,7 @@ require (
 	github.com/alibabacloud-go/dingtalk v1.5.76
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.3
-	github.com/patsnapops/noop v0.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cast v1.5.1
 )
@@ -26,10 +26,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
