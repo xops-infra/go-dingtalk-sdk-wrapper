@@ -8,7 +8,7 @@ import (
 	"time"
 
 	robot "github.com/alibabacloud-go/dingtalk/robot_1_0"
-	"github.com/alibabacloud-go/tea-utils/v2/service"
+	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 )
 
@@ -120,14 +120,15 @@ func (c *RobotClient) SendMessage(ctx context.Context, req *SendMessageRequest) 
 }
 
 // todo: 官方垃圾接口。没能设置 header token,RobotMessageFileDownload也不行
-func (c *RobotClient) GetDownloadMessageFileUrl(ctx context.Context, downloadCode, robotCode string) (*string, error) {
-	req := robot.RobotMessageFileDownloadRequest{
+func (c *RobotClient) GetDownloadMessageFileUrl(ctx context.Context, token, downloadCode, robotCode string) (*string, error) {
+	robotMessageFileDownloadHeaders := &robot.RobotMessageFileDownloadHeaders{}
+	robotMessageFileDownloadHeaders.XAcsDingtalkAccessToken = tea.String(token)
+	robotMessageFileDownloadRequest := &robot.RobotMessageFileDownloadRequest{
 		DownloadCode: tea.String(downloadCode),
 		RobotCode:    tea.String(robotCode),
 	}
-	resp, err := c.client.RobotMessageFileDownloadWithOptions(&req, &robot.RobotMessageFileDownloadHeaders{
-		XAcsDingtalkAccessToken: tea.String("123123"),
-	}, &service.RuntimeOptions{})
+	fmt.Println(tea.Prettify(robotMessageFileDownloadHeaders))
+	resp, err := c.client.RobotMessageFileDownloadWithOptions(robotMessageFileDownloadRequest, robotMessageFileDownloadHeaders, &util.RuntimeOptions{})
 	if err != nil {
 		return nil, err
 	}

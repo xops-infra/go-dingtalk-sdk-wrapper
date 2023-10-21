@@ -18,8 +18,8 @@ func init() {
 	}
 
 	config := DingTalkConfig{
-		AppKey:    os.Getenv("dingtalk_id"),
-		AppSecret: os.Getenv("dingtalk_secret"),
+		AppKey:    os.Getenv("CLIENT_ID"),
+		AppSecret: os.Getenv("CLIENT_SECRET"),
 	}
 	client, err = NewDingTalkClient(&config)
 	if err != nil {
@@ -30,7 +30,7 @@ func init() {
 
 func TestRobot(t *testing.T) {
 	req := SendMessageRequest{
-		AccessToken: os.Getenv("dingtalk_robot_token"),
+		AccessToken: os.Getenv("DingTalkRobotToken"),
 		MessageContent: MessageContent{
 			MsgType: "text",
 			Text: TextBody{
@@ -48,11 +48,13 @@ func TestRobot(t *testing.T) {
 }
 
 func TestDownloadMsgFile(t *testing.T) {
+	token := client.AccessToken
 	url, err := client.RobotSvc().GetDownloadMessageFileUrl(context.Background(),
+		token.Token,
 		"48ECiZIRMGiDlluFVo6tixz+JMgOlMqb/esv5UWK32QMCU9KqTlg8sRxRvfbruIpGvPs7DZQ3+xIvf0Pw3dhQkP7Pds7qU54oMhQytAfa+ABQ0RUv1/8gxmIbrMmcz9fUGPANkPP00xZhsf4XegmqFKMA8mQ7VEXkpKS0KmQ86kFx/ZwiyJYxO+nLm7eskk0mDMvjU9JMAaQU7ZCYrFmrey2m2cViZtNZtel6bFIYuM=",
-		"")
+		"dingtc0uerrekoaiw5hn")
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(url)
+	t.Log(*url)
 }
