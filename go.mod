@@ -8,7 +8,7 @@ require (
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.3
 	github.com/joho/godotenv v1.5.1
-	github.com/open-dingtalk/dingtalk-stream-sdk-go v0.6.0
+	github.com/open-dingtalk/dingtalk-stream-sdk-go v0.7.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cast v1.5.1
 )

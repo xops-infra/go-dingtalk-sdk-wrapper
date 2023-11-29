@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
+
 	. "github.com/xops-infra/go-dingtalk-sdk-wrapper"
 )
 
