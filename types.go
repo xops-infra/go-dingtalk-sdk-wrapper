@@ -3,7 +3,6 @@ package go_dingtalk_sdk_wrapper
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 	"time"
 
 	workflow "github.com/alibabacloud-go/dingtalk/workflow_1_0"
@@ -87,8 +86,48 @@ const (
 	Approving ApprovalResult = "approving"
 )
 
-// ProcessInstanceResp 重定向工单返回体
 type ProcessInstanceResp workflow.GetProcessInstanceResponseBody
+
+type ProcessInstanceRespV2 struct {
+	Success bool                  `json:"success"`
+	Result  ProcessInstanceResult `json:"result"`
+}
+
+// 没有完全写完，需要自己加入解析的字段
+type ProcessInstanceResult struct {
+	Status              *string              `json:"status"`
+	Title               *string              `json:"title"`
+	FinishTime          *string              `json:"finishTime"`
+	CreateTime          *string              `json:"createTime"`
+	Result              *string              `json:"result"`
+	BusinessId          *string              `json:"businessId"`
+	OperationRecords    []OperationRecord    `json:"operationRecords"`
+	Tasks               []ApprovalTask       `json:"tasks"`
+	FormComponentValues []FormComponentValue `json:"formComponentValues"`
+}
+
+type ApprovalTask struct {
+	ActivityId        *string `json:"activityId,omitempty" xml:"activityId,omitempty"`
+	CreateTime        *string `json:"createTime,omitempty" xml:"createTime,omitempty"`
+	FinishTime        *string `json:"finishTime,omitempty" xml:"finishTime,omitempty"`
+	MobileUrl         *string `json:"mobileUrl,omitempty" xml:"mobileUrl,omitempty"`
+	PcUrl             *string `json:"pcUrl,omitempty" xml:"pcUrl,omitempty"`
+	ProcessInstanceId *string `json:"processInstanceId,omitempty" xml:"processInstanceId,omitempty"`
+	Result            *string `json:"result,omitempty" xml:"result,omitempty"`
+	Status            *string `json:"status,omitempty" xml:"status,omitempty"`
+	TaskId            *int64  `json:"taskId,omitempty" xml:"taskId,omitempty"`
+	UserId            *string `json:"userId,omitempty" xml:"userId,omitempty"`
+}
+
+type OperationRecord struct {
+	UserId      *string           `json:"userId"`
+	Date        *string           `json:"date"`
+	Type        *string           `json:"type"`
+	Result      *string           `json:"result"`
+	Remark      *string           `json:"remark"`
+	Attachments []AttachmentFiled `json:"attachments"`
+	CcUserIds   []string          `json:"ccUserIds"`
+}
 
 type GrantProcessInstanceForDownloadFileResp workflow.GrantProcessInstanceForDownloadFileResponseBody
 
@@ -152,62 +191,6 @@ func (r *ProcessInstanceResp) GetComment() ([]CommentResp, error) {
 	}
 	return comments, nil
 }
-
-func (r *ProcessInstanceResp) getTasks() ApprovalTask {
-	return r.Result.Tasks
-}
-
-func (r *ProcessInstanceResp) GetApprovedUser() []Json {
-	var userIdList []Json
-	task := r.getTasks()
-	sort.Sort(task)
-	for i := 0; i < len(task); i++ {
-		if tea.StringValue(task[i].Result) == "AGREE" && tea.StringValue(task[i].Status) == "COMPLETED" {
-			userIdList = append(userIdList, Json{"id": tea.StringValue(task[i].UserId), "next": false})
-		} else if tea.StringValue(task[i].Result) == "NONE" && tea.StringValue(task[i].Status) == "RUNNING" {
-			userIdList = append(userIdList, Json{"id": tea.StringValue(task[i].UserId), "next": true})
-		}
-	}
-	return userIdList
-}
-
-// ApprovalTask 审批流程 别名 并自定义根据CreateTime 排序
-type ApprovalTask []*workflow.GetProcessInstanceResponseBodyResultTasks
-
-func (t ApprovalTask) Len() int {
-	return len(t)
-}
-
-func (t ApprovalTask) Less(i, j int) bool {
-	return tea.StringValue(t[i].CreateTime) < tea.StringValue(t[j].CreateTime)
-}
-
-func (t ApprovalTask) Swap(i, j int) {
-	temp := t[i]
-	t[i] = t[j]
-	t[j] = temp
-}
-
-//type Cache interface {
-//	Set() error
-//	Get() (string, error)
-//}
-//
-//type MemoryCache struct {
-//}
-//
-//func NewMemoryCache() *MemoryCache {
-//	return &MemoryCache{}
-//}
-//
-//func (r *MemoryCache) Set() error {
-//
-//	return nil
-//}
-//
-//func (r *MemoryCache) Get() error {
-//	return nil
-//}
 
 type CommonResponse struct {
 	ErrCode int    `json:"errcode"`

@@ -4,21 +4,17 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"testing"
 
 	"github.com/joho/godotenv"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/chatbot"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/client"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/event"
-	"github.com/open-dingtalk/dingtalk-stream-sdk-go/logger"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/payload"
 	"github.com/open-dingtalk/dingtalk-stream-sdk-go/plugin"
 )
 
 var cred *client.AppCredentialConfig
-
-const (
-	topic = "/v1.0/im/bot/messages/get"
-)
 
 func init() {
 	err := godotenv.Load(".env")
@@ -57,8 +53,7 @@ func OnPluginMessageReceived(ctx context.Context, request *plugin.GraphRequest) 
 // 事件处理
 func OnEventReceived(ctx context.Context, df *payload.DataFrame) (frameResp *payload.DataFrameResponse, err error) {
 	eventHeader := event.NewEventHeaderFromDataFrame(df)
-
-	logger.GetLogger().Infof("received event, eventId=[%s] eventBornTime=[%d] eventCorpId=[%s] eventType=[%s] eventUnifiedAppId=[%s] data=[%s]",
+	fmt.Printf("received event, eventId=[%s] eventBornTime=[%d] eventCorpId=[%s] eventType=[%s] eventUnifiedAppId=[%s] data=[%s]\n",
 		eventHeader.EventId,
 		eventHeader.EventBornTime,
 		eventHeader.EventCorpId,
@@ -92,4 +87,8 @@ func main() {
 	defer cli.Close()
 
 	select {}
+}
+
+func TestMain(t *testing.T) {
+	main()
 }
