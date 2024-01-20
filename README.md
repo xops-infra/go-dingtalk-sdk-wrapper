@@ -14,3 +14,5 @@ go get github.com/xops-infra/go-dingtalk-sdk-wrapper
     - （http）发送群消息[robot_test.go](examples/robot/main_test.go)
 2. 事件订阅 Stream
     - （官方库）Stream方式问答机器人和事件订阅[robot_stream_test.go](examples/dingtalk_stream/main_test.go)
+3. 工单相关 Workflow
+    - （http）[workflow_test.go](examples/workflow/main_test.go)

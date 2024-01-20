@@ -19,13 +19,19 @@ type CreateProcessInstanceInput struct {
 }
 
 type FormComponentValue struct {
-	Name  string `json:"name" binding:"required"`  // 表单控件名称
-	Value string `json:"value" binding:"required"` // 表单控件值
+	ID            *string `json:"id"`
+	ExtValue      *string `json:"extValue"`
+	ComponentType *string `json:"componentType"`
+	BizAlias      *string `json:"bizAlias"`
+	Name          *string `json:"name" binding:"required"`  // 表单控件名称
+	Value         *string `json:"value" binding:"required"` // 表单控件值
 }
 
 type Workflow interface {
 	// 创建审批实例
 	CreateProcessInstance(input *CreateProcessInstanceInput, accessToken string) (string, error)
+	// 查询审批工单
+	GetProcessInstance(processID string, accessToken string) (*ProcessInstanceRespV2, error)
 }
 
 type workflowClient struct {
@@ -58,4 +64,22 @@ func (c *workflowClient) CreateProcessInstance(input *CreateProcessInstanceInput
 		return "", err
 	}
 	return response.InstanceId, nil
+}
+
+// 查询审批工单
+// /v1.0/workflow/processInstances?processInstanceId=a171de6c-8bxxxx
+func (c *workflowClient) GetProcessInstance(processID string, accessToken string) (*ProcessInstanceRespV2, error) {
+	var response ProcessInstanceRespV2
+	url := fmt.Sprintf("https://api.dingtalk.com/v1.0/workflow/processInstances?processInstanceId=%s", processID)
+	build, err := c.requestBuilder.build(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	build.Header.Set("x-acs-dingtalk-access-token", accessToken)
+	build.Header.Set("Content-Type", "application/json")
+	err = c.requestBuilder.sendRequest(build, &response)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
 }

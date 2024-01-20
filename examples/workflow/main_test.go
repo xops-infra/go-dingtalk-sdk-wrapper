@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/joho/godotenv"
 
 	dt "github.com/xops-infra/go-dingtalk-sdk-wrapper"
@@ -31,24 +32,8 @@ func TestCreateProcessInstance(t *testing.T) {
 		DeptId:           os.Getenv("DEPT_ID"),
 		FormComponentValues: []dt.FormComponentValue{
 			{
-				Name:  "Teams",
-				Value: "ops",
-			},
-			{
-				Name:  "Assets",
-				Value: "xxxx",
-			},
-			{
-				Name:  "Actions",
-				Value: "connect,donwload",
-			},
-			{
-				Name:  "DateExpired",
-				Value: "1d",
-			},
-			{
-				Name:  "Comment",
-				Value: "测试接口",
+				Name:  tea.String("Teams"),
+				Value: tea.String("xxxx"),
 			},
 		},
 	}, client.AccessToken.Token)
@@ -56,4 +41,12 @@ func TestCreateProcessInstance(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Println(id)
+}
+
+func TestGetProcessInstance(t *testing.T) {
+	resp, err := client.Workflow.GetProcessInstance(os.Getenv("PROCESS_INSTANCE_ID"), client.AccessToken.Token)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(tea.Prettify(resp))
 }
