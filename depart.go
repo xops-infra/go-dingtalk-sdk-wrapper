@@ -6,7 +6,7 @@ import (
 )
 
 type Department struct {
-	DepartID int64  `json:"depart_id"`
+	DepartID int64  `json:"dept_id"`
 	Name     string `json:"name"`
 	ParentID int64  `json:"parent_id"`
 	// create_dept_group bool
