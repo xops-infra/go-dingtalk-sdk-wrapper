@@ -78,6 +78,8 @@ type Depart interface {
 	GetDepartmentDetail(input *GetDepartmentDetailInput, accessToken string) (*Department, error)
 	// 获取部门列表
 	GetDepartments(input *GetDepartmentsInput, accessToken string) ([]*Department, error)
+	// 获取所有部门
+	GetAllDepartments(accessToken string) ([]*Department, error)
 	// 获取子部门ID列表
 	GetDepartmentIDs(input *GetDepartmentsIDInput, accessToken string) ([]int64, error)
 	// 获取所有部门 ID
@@ -118,6 +120,10 @@ func (c *departmentClient) GetDepartments(input *GetDepartmentsInput, accessToke
 	}
 	departments = response.Result
 	return departments, nil
+}
+
+func (c *departmentClient) GetAllDepartments(accessToken string) ([]*Department, error) {
+	return c.getAllDepartments(1, accessToken)
 }
 
 func (c *departmentClient) GetDepartmentIDs(input *GetDepartmentsIDInput, accessToken string) ([]int64, error) {
@@ -167,4 +173,39 @@ func (c *departmentClient) getAllDepartmentIDs(departID int64, token string) (de
 	}
 
 	return allDepartmentIDs, nil
+}
+
+func (c *departmentClient) getAllDepartments(departID int64, accessToken string) (departments []*Department, err error) {
+	var allDepartments []*Department
+
+	if departID == 1 {
+		rootDepartment, err := c.GetDepartmentDetail(&GetDepartmentDetailInput{DeptID: 1, Language: "zh_CN"}, accessToken)
+		if err != nil {
+			return nil, err
+		}
+		allDepartments = append(allDepartments, rootDepartment)
+	}
+
+	departs, err := c.GetDepartments(&GetDepartmentsInput{
+		DeptID:   departID,
+		Language: "zh_CN",
+	}, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	allDepartments = append(allDepartments, departs...)
+
+	if len(departs) != 0 {
+		for _, department := range departs {
+			subDeparts, err := c.getAllDepartments(department.DepartID, accessToken)
+			if err != nil {
+				return nil, err
+			}
+
+			allDepartments = append(allDepartments, subDeparts...)
+		}
+	}
+
+	return allDepartments, nil
 }
