@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	dt "github.com/xops-infra/go-dingtalk-sdk-wrapper"
 )
@@ -32,51 +31,25 @@ func main() {
 	}()
 
 	usersAll := make(map[string]*dt.UserInfo, 0)
-	departIDChan := make(chan int64, 2000) // 如果发现 chan 夯住了，可以跳大。
-	go getDepart(departIDChan)
-	for depart := range departIDChan {
-		departRes, err := client.Depart.GetDepartmentIDs(&dt.GetDepartmentsIDInput{
-			DeptID: depart,
-		}, token)
-		if err != nil {
-			panic(err)
-		}
-		for _, v := range departRes {
-			departIDChan <- v
-		}
+	allDepartmentIDs, err := client.Depart.GetAllDepartmentIDs(token)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("all department ids' length: ", len(allDepartmentIDs), "all department ids: ", allDepartmentIDs)
+
+	for _, departmentID := range allDepartmentIDs {
 		users, err := client.User.GetUsers(&dt.GetUsersInput{
-			DeptID: depart,
-			Size:   20,
+			DeptID: departmentID,
+			Size:   100,
 			Cursor: 0,
 		}, token)
 		if err != nil {
 			panic(err)
 		}
 		for _, v := range users {
-			usersAll[v.Name] = v
+			usersAll[v.Email] = v
 		}
 	}
-	fmt.Println("users nu:", len(usersAll))
-}
-
-func getDepart(c chan int64) {
-	token := client.AccessToken.Token
-	input := &dt.GetDepartmentsIDInput{
-		DeptID: int64(1),
-	}
-	departRes, err := client.Depart.GetDepartmentIDs(input, token)
-	if err != nil {
-		panic(err)
-	}
-	for _, v := range departRes {
-		c <- v
-	}
-	for {
-		if len(c) == 0 {
-			close(c)
-		}
-		time.Sleep(time.Second)
-		// 清理屏幕
-		fmt.Println("get depart", len(c))
-	}
+	fmt.Println("users count:", len(usersAll), "users: \n", usersAll)
 }

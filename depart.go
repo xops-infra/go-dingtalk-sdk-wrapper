@@ -57,9 +57,11 @@ type departmentClient struct {
 
 type Depart interface {
 	// 获取部门列表
-	GetDepartments(*GetDepartmentsInput, string) ([]*Department, error)
+	GetDepartments(input *GetDepartmentsInput, accessToken string) ([]*Department, error)
 	// 获取子部门ID列表
-	GetDepartmentIDs(*GetDepartmentsIDInput, string) ([]int64, error)
+	GetDepartmentIDs(input *GetDepartmentsIDInput, accessToken string) ([]int64, error)
+	// 获取所有部门 ID
+	GetAllDepartmentIDs(accessToken string) ([]int64, error)
 }
 
 func NewDepart(requestBuilder requestBuilder) Depart {
@@ -98,4 +100,37 @@ func (c *departmentClient) GetDepartmentIDs(input *GetDepartmentsIDInput, access
 	}
 	subDepartments = response.Result.DepartIDList
 	return subDepartments, nil
+}
+
+func (c *departmentClient) GetAllDepartmentIDs(accessToken string) ([]int64, error) {
+	return c.getAllDepartmentIDs(1, accessToken)
+}
+
+func (c *departmentClient) getAllDepartmentIDs(departID int64, token string) (departmentIDs []int64, err error) {
+	var allDepartmentIDs []int64
+	if departID == 1 {
+		allDepartmentIDs = append(allDepartmentIDs, 1)
+	}
+
+	departIDs, err := c.GetDepartmentIDs(&GetDepartmentsIDInput{
+		DeptID: departID,
+	}, token)
+	if err != nil {
+		return nil, err
+	}
+
+	allDepartmentIDs = append(allDepartmentIDs, departIDs...)
+
+	if len(departIDs) != 0 {
+		for _, departID := range departIDs {
+			departIDs, err := c.getAllDepartmentIDs(departID, token)
+			if err != nil {
+				return nil, err
+			}
+
+			allDepartmentIDs = append(allDepartmentIDs, departIDs...)
+		}
+	}
+
+	return allDepartmentIDs, nil
 }
