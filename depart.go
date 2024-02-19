@@ -15,6 +15,24 @@ type Department struct {
 	AutoAddUser bool `json:"auto_add_user"`
 }
 
+type GetDepartmentDetailInput struct {
+	// dept_id number
+	DeptID int64 `json:"dept_id"`
+	// language string example:zh_CN,en_US
+	Language string `json:"language"`
+}
+
+type GetDepartmentDetailResponse struct {
+	// request_id
+	RequestId string `json:"request_id"`
+	// errcode
+	ErrCode int `json:"errcode"`
+	// errmsg
+	ErrMsg string `json:"errmsg"`
+	// result
+	Result Department `json:"result"`
+}
+
 type GetDepartmentsIDInput struct {
 	// dept_id number
 	DeptID int64 `json:"dept_id"`
@@ -56,6 +74,8 @@ type departmentClient struct {
 }
 
 type Depart interface {
+	// 获取部门详情
+	GetDepartmentDetail(input *GetDepartmentDetailInput, accessToken string) (*Department, error)
 	// 获取部门列表
 	GetDepartments(input *GetDepartmentsInput, accessToken string) ([]*Department, error)
 	// 获取子部门ID列表
@@ -68,6 +88,20 @@ func NewDepart(requestBuilder requestBuilder) Depart {
 	return &departmentClient{
 		requestBuilder: requestBuilder,
 	}
+}
+
+func (c *departmentClient) GetDepartmentDetail(input *GetDepartmentDetailInput, accessToken string) (*Department, error) {
+	var response GetDepartmentDetailResponse
+	url := "https://oapi.dingtalk.com/topapi/v2/department/get?access_token=" + accessToken
+	build, err := c.requestBuilder.build(context.Background(), http.MethodPost, url, input)
+	if err != nil {
+		return nil, err
+	}
+	err = c.requestBuilder.sendRequest(build, &response)
+	if err != nil {
+		return nil, err
+	}
+	return &response.Result, nil
 }
 
 func (c *departmentClient) GetDepartments(input *GetDepartmentsInput, accessToken string) ([]*Department, error) {
