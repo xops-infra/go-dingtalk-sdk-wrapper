@@ -42,6 +42,7 @@ type DingTalkClient struct {
 	DingTalkConfig *DingTalkConfig
 	// Needed Client
 	WorkflowClient *WorkflowClient
+	RobotClient    *RobotClient
 	MiniProgram    MiniProgram
 	Workflow       Workflow
 	Depart         Depart
@@ -64,6 +65,11 @@ func NewDingTalkClient(appConfig *DingTalkConfig) (*DingTalkClient, error) {
 		return nil, err
 	}
 	return dingTalkClient, nil
+}
+
+func (d *DingTalkClient) WithRobotClient() *DingTalkClient {
+	d.RobotClient = NewRobotClient()
+	return d
 }
 
 func (d *DingTalkClient) WithWorkflowClient() *DingTalkClient {
